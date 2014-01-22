@@ -2,7 +2,7 @@ import QtQuick 2.0
 
 Canvas {
     id:canvas
-    property color color: "red"
+    property color color: "cyan"
     property real lineWidth: 1.5
     property point startPoint: Qt.point(0,0)
     property point controlPoint1: Qt.point(0,40)

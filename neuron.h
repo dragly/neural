@@ -14,6 +14,8 @@ public:
     void addOutputNeuron(Neuron* other);
     void setInputValue(double value);
     double outputValue();
+    const std::vector<Neuron *>& outputNeurons() const;
+
 private:
     bool m_isInput;
     bool m_isOutput;

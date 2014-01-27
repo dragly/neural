@@ -15,22 +15,25 @@ void NeuralNetwork::setup(uint nNeurons, uint nInputNeurons, uint nOutputNeurons
     m_inputNeurons.clear();
     m_outputNeurons.clear();
 
-    m_neurons.resize(nNeurons);
+    for(uint i = 0; i < nNeurons; i++) {
+        Neuron* neuron = new Neuron();
+        m_neurons.push_back(neuron);
+    }
     for(uint i = 0; i < nInputNeurons; i++) {
-        Neuron &neuron = m_neurons.at(i);
-        m_inputNeurons.push_back(&neuron);
+        Neuron* neuron = m_neurons.at(i);
+        m_inputNeurons.push_back(neuron);
     }
     for(uint i = nNeurons - nOutputNeurons; i < nNeurons; i++) {
-        Neuron &neuron = m_neurons.at(i);
-        m_outputNeurons.push_back(&neuron);
+        Neuron* neuron = m_neurons.at(i);
+        m_outputNeurons.push_back(neuron);
     }
 
     // Set up connections
-    for(Neuron &neuron : m_neurons) {
+    for(Neuron* neuron : m_neurons) {
         for(uint i = 0; i < nConnections; i++) {
             uint randomIndex = rand() / RAND_MAX * nNeurons;
-            Neuron* otherNeuron = &(m_neurons.at(randomIndex));
-            neuron.addOutputNeuron(otherNeuron);
+            Neuron* otherNeuron = m_neurons[randomIndex];
+            neuron->addOutputNeuron(otherNeuron);
         }
     }
 }
@@ -50,11 +53,11 @@ void NeuralNetwork::setInputValues(vec inputValues)
 
 void NeuralNetwork::advance()
 {
-    for(Neuron &neuron : m_neurons) {
-        neuron.sendOutput();
+    for(Neuron* neuron : m_neurons) {
+        neuron->sendOutput();
     }
-    for(Neuron &neuron : m_neurons) {
-        neuron.advance();
+    for(Neuron* neuron : m_neurons) {
+        neuron->advance();
     }
 }
 

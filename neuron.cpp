@@ -1,6 +1,13 @@
 #include "neuron.h"
+#include <iostream>
 
-Neuron::Neuron()
+using namespace std;
+
+Neuron::Neuron() :
+    m_inputValue(10),
+    m_outputValue(20),
+    m_isInput(false),
+    m_isOutput(false)
 {
 }
 
@@ -33,4 +40,8 @@ void Neuron::addOutputNeuron(Neuron *other)
 
 double Neuron::outputValue() {
     return m_outputValue;
+}
+const std::vector<Neuron *>& Neuron::outputNeurons() const
+{
+    return m_outputNeurons;
 }

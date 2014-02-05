@@ -1,9 +1,14 @@
 #include "neuralnetwork.h"
 
+#include <connection.h>
+#include <neuron.h>
+
 using namespace arma;
 
 NeuralNetwork::NeuralNetwork()
 {
+    srand(time(NULL));
+//    srand(-1);
 }
 
 void NeuralNetwork::setup(uint nNeurons, uint nInputNeurons, uint nOutputNeurons, uint nConnections) {
@@ -21,19 +26,25 @@ void NeuralNetwork::setup(uint nNeurons, uint nInputNeurons, uint nOutputNeurons
     }
     for(uint i = 0; i < nInputNeurons; i++) {
         Neuron* neuron = m_neurons.at(i);
+        neuron->setInput(true);
         m_inputNeurons.push_back(neuron);
     }
     for(uint i = nNeurons - nOutputNeurons; i < nNeurons; i++) {
         Neuron* neuron = m_neurons.at(i);
+        neuron->setOutput(true);
         m_outputNeurons.push_back(neuron);
     }
 
     // Set up connections
     for(Neuron* neuron : m_neurons) {
         for(uint i = 0; i < nConnections; i++) {
-            uint randomIndex = rand() / RAND_MAX * nNeurons;
+            uint randomIndex = randu() * nNeurons;
             Neuron* otherNeuron = m_neurons[randomIndex];
-            neuron->addOutputNeuron(otherNeuron);
+            Connection* connection = new Connection(neuron, otherNeuron);
+            connection->setWeight(1.0);
+            connection->setTimeLeft(randu() * 100);
+            neuron->addOutputConnection(connection);
+            m_connections.push_back(connection);
         }
     }
 }
@@ -51,7 +62,7 @@ void NeuralNetwork::setInputValues(vec inputValues)
     }
 }
 
-void NeuralNetwork::advance()
+void NeuralNetwork::stepForward()
 {
     for(Neuron* neuron : m_neurons) {
         neuron->sendOutput();

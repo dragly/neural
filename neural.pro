@@ -11,7 +11,8 @@ SOURCES += main.cpp \
     neuron.cpp \
     neuralnetwork.cpp \
     neuronadapter.cpp \
-    neuralnetworkadapter.cpp
+    neuralnetworkadapter.cpp \
+    connection.cpp
 
 # Installation path
 # target.path =
@@ -24,7 +25,8 @@ HEADERS += \
     neuron.h \
     neuralnetwork.h \
     neuronadapter.h \
-    neuralnetworkadapter.h
+    neuralnetworkadapter.h \
+    connection.h
 
 QMAKE_CXXFLAGS += -std=c++0x
 

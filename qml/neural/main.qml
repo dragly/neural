@@ -5,6 +5,7 @@ import NeuralNetwork 1.0
 
 ApplicationWindow {
     id: appWindow
+
     title: qsTr("Hello World")
     width: 1280
     height: 720
@@ -21,12 +22,20 @@ ApplicationWindow {
 
     NeuralNetworkAdapter {
         id: neuralNetwork
+
+        property list<Neuron> neurons
+        property list<Connection> connections
+
         anchors.fill: parent
+
+        function banana() {
+            console.log("Banana")
+        }
 
         Component.onCompleted: {
             var nextX = 100;
             var nextY = 100;
-            var neurons = []
+            var newNeurons = []
             for(var i in neuronAdapters) {
                 var neuronAdapter = neuronAdapters[i]
                 // Create neurons based on neural network
@@ -45,6 +54,9 @@ ApplicationWindow {
                     continue
                 }
                 neuronAdapter.neuronQML = neuron
+                neuron.clicked.connect(banana)
+
+                newNeurons.push(neuron)
 
                 nextX += 100
                 if(nextX > width) {
@@ -52,6 +64,8 @@ ApplicationWindow {
                     nextX = 50
                 }
             }
+            neurons = newNeurons
+            var newConnections = []
             for(var i in neuronAdapters) {
                 var sourceNeuronAdapter = neuronAdapters[i]
                 var sourceNeuron = sourceNeuronAdapter.neuronQML
@@ -65,8 +79,10 @@ ApplicationWindow {
                     }
 //                    console.log(sourceNeuronAdapter.neuronQML + " -> " + targetNeuronAdapter.neuronQML)
                     var connection = component.createObject(neuralNetwork, properties);
+                    newConnections.push(connection)
                 }
             }
+            connections = newConnections
         }
     }
 

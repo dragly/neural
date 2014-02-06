@@ -27,13 +27,12 @@ int main(int argc, char *argv[])
     network.setInputValues(inputValues);
     double previousOutput = 1;
     double currentOutput = 1;
-    for(int i = 0; i < 100; i++) {
-        network.stepForward();
+    for(int i = 0; i < 10000; i++) {
+        network.advance();
         previousOutput = currentOutput;
         currentOutput = network.outputValues()(0);
 //        cout << currentOutput << endl;
     }
     cout << currentOutput << endl;
-    cout << (currentOutput - previousOutput) / currentOutput << endl;
     return 0;
 }

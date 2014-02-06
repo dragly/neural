@@ -17,11 +17,16 @@ public:
     arma::vec outputValues();
 
     const std::vector<Neuron*>& neurons();
+    void transform();
+    void advance();
 private:
     std::vector<Neuron*> m_neurons;
     std::vector<Neuron*> m_inputNeurons;
     std::vector<Neuron*> m_outputNeurons;
     std::vector<Connection*> m_connections;
+    arma::vec m_targetOutputValues;
+    arma::vec m_previousDiff;
+    arma::vec m_currentDiff;
 };
 
 inline const std::vector<Neuron *> &NeuralNetwork::neurons()

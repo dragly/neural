@@ -9,7 +9,7 @@
 using namespace std;
 using namespace arma;
 
-int main(int argc, char *argv[])
+int main()
 {
 //    qmlRegisterType<NeuralNetworkAdapter>("NeuralNetwork", 1, 0, "NeuralNetworkAdapter");
 //    qmlRegisterType<NeuronAdapter>("NeuralNetwork", 1, 0, "NeuronAdapter");
@@ -22,17 +22,81 @@ int main(int argc, char *argv[])
 
 //    return app.exec();
     NeuralNetwork network;
-    network.setup(20, 1, 1, 7);
-    vec inputValues = 12 * ones(1);
-    network.setInputValues(inputValues);
-    double previousOutput = 1;
-    double currentOutput = 1;
+    network.setup(20, 1, 1, 4);
+    network.setInputValues(12 * ones(1));
+    network.setTargetOutputValues(205 * ones(1));
     for(int i = 0; i < 10000; i++) {
         network.advance();
-        previousOutput = currentOutput;
-        currentOutput = network.outputValues()(0);
-//        cout << currentOutput << endl;
+//        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
     }
-    cout << currentOutput << endl;
+    cout << "First output: " << network.outputValues()(0) << endl;
+    network.setInputValues(24 * ones(1));
+    network.setTargetOutputValues(456 * ones(1));
+    network.resetTemperature();
+    for(int i = 0; i < 10000; i++) {
+        network.advance();
+//        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    }
+    cout << "Second output: " << network.outputValues()(0) << endl;
+    network.setInputValues(12 * ones(1));
+    network.setTargetOutputValues(205 * ones(1));
+    network.resetTemperature();
+    for(int i = 0; i < 10000; i++) {
+        network.advance();
+//        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    }
+    cout << "Third output: " << network.outputValues()(0) << endl;
+    network.setInputValues(24 * ones(1));
+    network.setTargetOutputValues(456 * ones(1));
+    network.resetTemperature();
+    for(int i = 0; i < 10000; i++) {
+        network.advance();
+//        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    }
+    cout << "Fourth output: " << network.outputValues()(0) << endl;
+    network.setInputValues(12 * ones(1));
+    network.setTargetOutputValues(205 * ones(1));
+    network.resetTemperature();
+    for(int i = 0; i < 10000; i++) {
+        network.advance();
+//        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    }
+    cout << "Fifth output: " << network.outputValues()(0) << endl;
+    network.setInputValues(24 * ones(1));
+    network.setTargetOutputValues(456 * ones(1));
+    network.resetTemperature();
+    for(int i = 0; i < 10000; i++) {
+        network.advance();
+//        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    }
+    cout << "Sixth output: " << network.outputValues()(0) << endl;
+    network.setInputValues(12 * ones(1));
+    network.setTargetOutputValues(205 * ones(1));
+    network.resetTemperature();
+    for(int i = 0; i < 10000; i++) {
+        network.advance();
+//        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    }
+    cout << "Seventh output: " << network.outputValues()(0) << endl;
+    network.setInputValues(24 * ones(1));
+    network.setTargetOutputValues(456 * ones(1));
+    network.resetTemperature();
+    for(int i = 0; i < 10000; i++) {
+        network.advance();
+//        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    }
+    cout << "Eight output: " << network.outputValues()(0) << endl;
+    network.setInputValues(12 * ones(1));
+    network.setTargetOutputValues(205 * ones(1));
+    network.resetTemperature();
+    for(int i = 0; i < 10000; i++) {
+        network.advance();
+//        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    }
+    cout << "Ninth output: " << network.outputValues()(0) << endl;
+    network.setInputValues(24 * ones(1));
+    network.setTargetOutputValues(456 * ones(1));
+    network.calculate();
+    cout << "Final output: " << network.outputValues()(0) << endl;
     return 0;
 }

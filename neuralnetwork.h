@@ -19,14 +19,23 @@ public:
     const std::vector<Neuron*>& neurons();
     void transform();
     void advance();
+    void restore();
+    void reset();
+    arma::vec targetOutputValues() const;
+    void setTargetOutputValues(const arma::vec &targetOutputValues);
+    void resetTemperature();
+
+    void calculate();
 private:
     std::vector<Neuron*> m_neurons;
     std::vector<Neuron*> m_inputNeurons;
     std::vector<Neuron*> m_outputNeurons;
     std::vector<Connection*> m_connections;
     arma::vec m_targetOutputValues;
-    arma::vec m_previousDiff;
-    arma::vec m_currentDiff;
+    double m_previousDiff;
+    double m_currentDiff;
+    double m_temperature;
+    int m_nAdvances;
 };
 
 inline const std::vector<Neuron *> &NeuralNetwork::neurons()

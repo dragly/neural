@@ -19,17 +19,14 @@ public:
     bool isChanged();
 
     void incrementLifeTime();
-    void setPreviousBetter(bool isPreviousBetter);
     void setChanged(bool changed);
     void restorePrevious();
-    bool isPreviousBetter();
 private:
     Neuron* m_sourceNeuron;
     Neuron* m_targetNeuron;
     int m_lifeTime;
     double m_weight;
     double m_previousWeight;
-    bool m_previousBetter;
     bool m_changed;
 };
 

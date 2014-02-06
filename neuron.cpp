@@ -14,11 +14,31 @@ Neuron::Neuron() :
 {
 }
 
+void Neuron::reset() {
+    if(!m_isInput) {
+        m_inputValue = 0;
+        m_inputValueSum = 0;
+        m_outputValue = 0;
+        m_nInputValues = 0;
+    }
+}
+
+int Neuron::id()
+{
+    return m_id;
+}
+
+void Neuron::setID(int id)
+{
+    m_id = id;
+}
+
 void Neuron::setInputValue(double value) {
     if(!m_isInput) {
         cerr << "Setting input value on a neuron that is not an input neuron" << endl;
     }
     m_inputValue = value;
+    advance();
 }
 
 void Neuron::addInputValue(double value)
@@ -30,16 +50,22 @@ void Neuron::addInputValue(double value)
 void Neuron::advance()
 {
     if(!m_isInput) {
-        m_inputValue = m_inputValueSum / m_nInputValues;
+        if(m_nInputValues > 0) {
+            m_inputValue = m_inputValueSum / m_nInputValues;
+        } else {
+            m_inputValue = 0;
+        }
     }
-    m_outputValue = m_inputValue / m_outputConnections.size();
+    m_outputValue = m_inputValue; // / m_outputConnections.size();
     m_inputValueSum = 0;
+    m_nInputValues = 0;
 }
 
 void Neuron::sendOutput()
 {
     for(Connection* connection : m_outputConnections) {
         Neuron* otherNeuron = connection->targetNeuron();
+//        cout << "From " << id() << " to " << otherNeuron->id() << " " << connection->weight() << "*" << m_outputValue << endl;
         otherNeuron->addInputValue(connection->weight() * m_outputValue);
     }
 }

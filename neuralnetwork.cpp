@@ -5,9 +5,12 @@
 
 using namespace arma;
 
-NeuralNetwork::NeuralNetwork()
+NeuralNetwork::NeuralNetwork() :
+    m_previousDiff(INFINITY),
+    m_currentDiff(1),
+    m_nAdvances(1)
 {
-    srand(time(NULL));
+    //    srand(time(NULL));
     //    srand(-1);
 }
 
@@ -16,13 +19,13 @@ void NeuralNetwork::setup(uint nNeurons, uint nInputNeurons, uint nOutputNeurons
         cerr << "NeuralNetwork::setup: The number of neurons must be larger than the number of inputs and outputs.";
         return;
     }
-    m_targetOutputValues = ones(1);
     m_neurons.clear();
     m_inputNeurons.clear();
     m_outputNeurons.clear();
 
     for(uint i = 0; i < nNeurons; i++) {
         Neuron* neuron = new Neuron();
+        neuron->setID(i);
         m_neurons.push_back(neuron);
     }
     for(uint i = 0; i < nInputNeurons; i++) {
@@ -41,13 +44,31 @@ void NeuralNetwork::setup(uint nNeurons, uint nInputNeurons, uint nOutputNeurons
         for(uint i = 0; i < nConnections; i++) {
             uint randomIndex = randu() * nNeurons;
             Neuron* otherNeuron = m_neurons[randomIndex];
+            if(otherNeuron == neuron) {
+                i--;
+                continue;
+            }
+            bool existsAlready = false;
+
+            for(Connection* existingConnection : m_connections) {
+                if(existingConnection->sourceNeuron() == neuron &&
+                        existingConnection->targetNeuron() == otherNeuron) {
+                    existsAlready = true;
+                }
+            }
+            if(existsAlready) {
+                i--;
+                continue;
+            }
             Connection* connection = new Connection(neuron, otherNeuron);
-            connection->setWeight(randu() * 1000);
+            //            connection->setWeight(randu() * 1000);
+            connection->setWeight(randn() * 1);
             connection->setLifeTime(randu() * 100);
             neuron->addOutputConnection(connection);
             m_connections.push_back(connection);
         }
     }
+    resetTemperature();
 }
 
 void NeuralNetwork::setInputValues(vec inputValues)
@@ -60,6 +81,7 @@ void NeuralNetwork::setInputValues(vec inputValues)
     for(uint i = 0; i < inputValues.size(); i++) {
         Neuron *inputNeuron = m_inputNeurons.at(i);
         inputNeuron->setInputValue(inputValues.at(i));
+        //        cout << "Neuron " << inputNeuron->id() << " has output value " << inputNeuron->outputValue() << endl;
     }
 }
 
@@ -73,27 +95,65 @@ void NeuralNetwork::stepForward()
     }
 }
 
+void NeuralNetwork::reset() {
+    for(Neuron* neuron : m_neurons) {
+        neuron->reset();
+    }
+}
+arma::vec NeuralNetwork::targetOutputValues() const
+{
+    return m_targetOutputValues;
+}
+
+void NeuralNetwork::setTargetOutputValues(const arma::vec &targetOutputValues)
+{
+    m_targetOutputValues = targetOutputValues;
+}
+
+void NeuralNetwork::resetTemperature()
+{
+    m_temperature = 1000;
+    m_nAdvances = 1;
+}
+
+
 void NeuralNetwork::advance() {
-    m_previousDiff = m_currentDiff;
+    transform();
+    calculate();
+    m_currentDiff = max(abs(m_targetOutputValues - outputValues()));
+
+    //    cout << m_currentDiff << "/" << m_previousDiff << endl;
+    //    if(randu() <= m_currentDiff / m_previousDiff)  {
+    //    cout << 0.01 * exp(-fabs(m_currentDiff)) << endl;
+    double deltaDiff = m_currentDiff - m_previousDiff;
+    if(randu() < exp(-deltaDiff / (m_temperature / m_nAdvances))) {
+//    if(m_currentDiff < m_previousDiff || randu() > 0.999 + 0.001 * exp(-m_currentDiff)) { // || randu() > 0.999 + 0.0005 * exp(-m_previousDiff))  {
+        //                cout << "Keeping" << endl;
+        //        m_previousDiff = m_currentDiff;
+        m_previousDiff = m_currentDiff;
+    } else {
+        //        cout << "Restoring" << endl;
+        restore();
+        calculate();
+    }
+    m_nAdvances++;
+}
+
+void NeuralNetwork::calculate() {
+    reset();
     for(int i = 0; i < 100; i++) {
         stepForward();
     }
-    m_currentDiff = m_targetOutputValues - outputValues();
-
-    bool previousIsBetter = false;
-    if(m_previousDiff.size() > 0) {
-        previousIsBetter = (max(abs(m_currentDiff)) > max(abs(m_previousDiff)));
-    }
-    for(Connection* connection : m_connections) {
-        if(connection->isChanged()) {
-            connection->setPreviousBetter(previousIsBetter);
-        }
-    }
-    transform();
 }
 
-bool compareConnections(Connection* L, Connection* R) {
-    return L->lifeTime() < R->lifeTime();
+void NeuralNetwork::restore() {
+    // Reset the changed-status of all connections
+    for(Connection* connection : m_connections) {
+        if(connection->isChanged()) {
+            connection->restorePrevious();
+            connection->setChanged(false);
+        }
+    }
 }
 
 void NeuralNetwork::transform() {
@@ -101,34 +161,18 @@ void NeuralNetwork::transform() {
     for(Connection* connection : m_connections) {
         connection->setChanged(false);
     }
-
-    // Algorithm that randomly selects a connection based on which have lived the longest
-    int lifeTimeSum = 0;
-    for(Connection* connection : m_connections) {
-        lifeTimeSum += connection->lifeTime();
+    // Select random connection
+    uint connectionID = randu() * m_connections.size();
+    Connection* connection = m_connections.at(connectionID);
+    double weightFactor = 10;
+    if(m_currentDiff < 1) {
+        weightFactor = 0.1;
     }
-
-    int randomLifeTime = randu() * lifeTimeSum;
-    for(Connection* connection : m_connections) {
-        if(randomLifeTime < connection->lifeTime()) {
-            // If the previous was better, change it by 50/50 chance
-            if(connection->isPreviousBetter() && randu() > 0.5) {
-                connection->restorePrevious();
-            } else {
-                connection->setWeight(randu() * 1000);
-                connection->setChanged(true);
-                connection->setLifeTime(0);
-            }
-            break;
-        } else {
-            randomLifeTime -= connection->lifeTime();
-        }
+    if(m_currentDiff < 0.1) {
+        weightFactor = 0.01;
     }
-
-    // Increment all connections' lifeTime
-    for(Connection* connection : m_connections) {
-        connection->incrementLifeTime();
-    }
+    connection->setWeight(randn() * weightFactor);
+    connection->setChanged(true);
 }
 
 vec NeuralNetwork::outputValues() {

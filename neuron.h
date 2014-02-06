@@ -23,6 +23,9 @@ public:
     bool isInput() const;
     void setInput(bool isInput);
 
+    void reset();
+    int id();
+    void setID(int id);
 private:
     bool m_isInput;
     bool m_isOutput;
@@ -32,6 +35,7 @@ private:
     double m_inputValueSum;
     std::vector<Connection *> m_outputConnections;
     std::vector<double> m_outputLifeTime;
+    int m_id;
 };
 
 #endif // NEURON_H

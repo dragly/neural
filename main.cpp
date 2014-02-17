@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 //    return app.exec();
     cout << "Starting network" << endl;
     NeuralNetwork network;
-    network.setup(22, 1, 1, 5);
+    network.setup(32, 1, 1, 5);
     double minInput = 0.9;
     double maxInput = 3.0;
     vec xVec = linspace(minInput, maxInput, 60);
@@ -57,7 +57,10 @@ int main(int argc, char* argv[])
     for(int i = 0; i < 8000000; i++) {
         network.advance();
         if(!(i % 10000)) {
-            cout << setprecision(5) << "Iteration " << i << ", error " << network.currentDiff() << " target " << target(2.0) << " output " << network.calculateRescaled(2.0)(0) << endl;
+            cout << setprecision(5) << "Iteration " << i << ", error " << network.error()
+                 << " target " << target(2.0) << " output " << network.calculateRescaled(2.0)(0)
+                 << " temperature " << network.temperature()
+                 << " factor " << network.addFactor() << endl;
             ofstream outFile("test.data");
             for(double x : xVec) {
                 outFile << x << " " << target(x) << " " << network.calculateRescaled(x)(0) << endl;

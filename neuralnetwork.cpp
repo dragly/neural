@@ -133,6 +133,10 @@ vec NeuralNetwork::normalizeInput(double value) {
     vec values = ones(1) * value;
     return normalizeInput(values);
 }
+double NeuralNetwork::addFactor() const
+{
+    return m_addFactor;
+}
 
 vec NeuralNetwork::normalizeOutput(double value) {
     vec values = ones(1) * value;
@@ -199,19 +203,21 @@ void NeuralNetwork::addTargetInputOutput(vec input, vec output)
 
 void NeuralNetwork::resetTemperature()
 {
-    m_temperature = 1000000;
+    m_temperature = 100000;
     m_nAdvances = 1;
 }
 
 
 void NeuralNetwork::advance() {
     transform();
-    m_currentDiff = 1;
+    m_currentDiff = 0.0;
     for(std::pair<vec, vec> targetInputOutput : m_targetInputOutput) {
         vec targetInput = targetInputOutput.first;
         vec targetOutput = targetInputOutput.second;
         vec outputValues = calculate(targetInput);
-        double thisDiff = max(abs(targetOutput - outputValues));
+        vec diff = targetOutput - outputValues;
+        double thisDiff = dot(diff, diff);
+//        m_currentDiff = thisDiff;
         m_currentDiff += thisDiff*thisDiff;
     }
     double deltaDiff = m_currentDiff - m_previousDiff;
@@ -225,8 +231,8 @@ void NeuralNetwork::advance() {
 //        cout << "Restore" << endl;
         restore();
     }
-    if(m_nAdvances < 1e5) {
-        m_temperature *= 0.999;
+    if(m_nAdvances < 1e6) {
+        m_temperature *= 0.9999;
     }
     m_nAdvances++;
 }
@@ -325,7 +331,7 @@ void NeuralNetwork::transform() {
     // Select random connection
     uint connectionID = randu() * m_connections.size();
     Connection* connection = m_connections.at(connectionID);
-    double weightFactor = 100;
+    double weightFactor = 1000 / max((m_nAdvances * 1e-3), 1.0);
     connection->setWeight(randn() * weightFactor);
     connection->setChanged(true);
 
@@ -337,7 +343,7 @@ void NeuralNetwork::transform() {
     // Select random neuron
     uint neuronID = randu() * m_neurons.size();
     Neuron* neuron = m_neurons.at(neuronID);
-    double addFactor = 100;
-    neuron->setAddition(randn() * addFactor);
+    m_addFactor = 1000 / max((m_nAdvances * 1e-3), 1.0);
+    neuron->setAddition(randn() * m_addFactor);
     neuron->setChanged(true);
 }

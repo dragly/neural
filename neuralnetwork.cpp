@@ -23,11 +23,12 @@ void NeuralNetwork::setup(uint nNeurons, uint nInputNeurons, uint nOutputNeurons
     m_inputNeurons.clear();
     m_outputNeurons.clear();
 
-    int nHiddenLayers = 2;
+    int nHiddenLayers = 3;
     int nPerLayer = (nNeurons - nInputNeurons - nOutputNeurons) / nHiddenLayers;
 
     vector<Neuron*> firstLayer;
     vector<Neuron*> secondLayer;
+    vector<Neuron*> thirdLayer;
 
     for(uint i = 0; i < nNeurons; i++) {
         Neuron* neuron = new Neuron();
@@ -53,6 +54,10 @@ void NeuralNetwork::setup(uint nNeurons, uint nInputNeurons, uint nOutputNeurons
         Neuron* neuron = m_neurons.at(i);
         secondLayer.push_back(neuron);
     }
+    for(uint i = nInputNeurons + 2*nPerLayer; i < nInputNeurons + 3 * nPerLayer; i++) {
+        Neuron* neuron = m_neurons.at(i);
+        thirdLayer.push_back(neuron);
+    }
 
     for(Neuron* neuron : m_inputNeurons) {
         for(Neuron* otherNeuron : firstLayer) {
@@ -71,6 +76,14 @@ void NeuralNetwork::setup(uint nNeurons, uint nInputNeurons, uint nOutputNeurons
     }
 
     for(Neuron* neuron : secondLayer) {
+        for(Neuron* otherNeuron : thirdLayer) {
+            Connection* connection = new Connection(neuron, otherNeuron);
+            neuron->addOutputConnection(connection);
+            m_connections.push_back(connection);
+        }
+    }
+
+    for(Neuron* neuron : thirdLayer) {
         for(Neuron* otherNeuron : m_outputNeurons) {
             Connection* connection = new Connection(neuron, otherNeuron);
             neuron->addOutputConnection(connection);
@@ -231,9 +244,7 @@ void NeuralNetwork::advance() {
 //        cout << "Restore" << endl;
         restore();
     }
-    if(m_nAdvances < 1e6) {
-        m_temperature *= 0.9999;
-    }
+    m_temperature = 0.0000001 + double(1000) / pow(m_nAdvances,1.1);
     m_nAdvances++;
 }
 
@@ -331,7 +342,7 @@ void NeuralNetwork::transform() {
     // Select random connection
     uint connectionID = randu() * m_connections.size();
     Connection* connection = m_connections.at(connectionID);
-    double weightFactor = 1000 / max((m_nAdvances * 1e-3), 1.0);
+    double weightFactor = 0.1 + 1000 / (m_nAdvances * 0.01);
     connection->setWeight(randn() * weightFactor);
     connection->setChanged(true);
 
@@ -343,7 +354,7 @@ void NeuralNetwork::transform() {
     // Select random neuron
     uint neuronID = randu() * m_neurons.size();
     Neuron* neuron = m_neurons.at(neuronID);
-    m_addFactor = 1000 / max((m_nAdvances * 1e-3), 1.0);
+    m_addFactor = 0.1 + 1000 / (m_nAdvances * 0.01);
     neuron->setAddition(randn() * m_addFactor);
     neuron->setChanged(true);
 }

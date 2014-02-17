@@ -10,6 +10,34 @@
 using namespace std;
 using namespace arma;
 
+double twoParticlePotential(double r) {
+    double HSiO = 11.387;
+    double etaSiO = 9;
+    double ZSi = 1.6;
+    double aSi = 0.00;
+    double ZO = -0.8;
+    double aO = 2.4;
+    double r4s = 4.43;
+    return HSiO / pow(r, etaSiO) + ZSi * ZO / r - 0.5 * (aSi * ZO * ZO + aO * ZSi * ZSi) / pow(r,4) * exp(-r/r4s);
+}
+
+double potential(double rij, double rik, double angle) {
+    // Potential for Si-O-Si bond
+    double Bijk = 1.4;
+    double r0 = 2.6;
+    double theta0 = 141.0 / 360. * 2*M_PI;
+    double V2 = twoParticlePotential(rij);
+    V2 += twoParticlePotential(rik);
+    double f = 0;
+    if(rij < r0 && rik < r0) {
+        f = exp(1 / (rij - r0) + 1 / (rik - r0));
+    }
+    double sqrtp = (cos(angle) - cos(theta0));
+    double p = sqrtp * sqrtp;
+    double V3 = Bijk * f * p;
+    return V2 + V3;
+}
+
 double target(double x) {
     double ri = 1/x;
     double ri2 = ri * ri;
@@ -26,118 +54,147 @@ double target(double x) {
 
 int main(int argc, char* argv[])
 {
-//    qmlRegisterType<NeuralNetworkAdapter>("NeuralNetwork", 1, 0, "NeuralNetworkAdapter");
-//    qmlRegisterType<NeuronAdapter>("NeuralNetwork", 1, 0, "NeuronAdapter");
+    //    qmlRegisterType<NeuralNetworkAdapter>("NeuralNetwork", 1, 0, "NeuralNetworkAdapter");
+    //    qmlRegisterType<NeuronAdapter>("NeuralNetwork", 1, 0, "NeuronAdapter");
 
-//    Application app(argc, argv);
+    //    Application app(argc, argv);
 
-//    QtQuick2ControlsApplicationViewer viewer;
-//    viewer.setMainQmlFile(QStringLiteral("qml/neural/main.qml"));
-//    viewer.show();
+    //    QtQuick2ControlsApplicationViewer viewer;
+    //    viewer.setMainQmlFile(QStringLiteral("qml/neural/main.qml"));
+    //    viewer.show();
 
-//    return app.exec();
+    //    return app.exec();
     cout << "Starting network" << endl;
     NeuralNetwork network;
-    network.setup(32, 1, 1, 5);
-    double minInput = 0.9;
-    double maxInput = 3.0;
-    vec xVec = linspace(minInput, maxInput, 60);
+    network.setup(32, 3, 1, 5);
+    double minInput = 1.5;
+    double maxInput = 2.7;
     double minOutput = 9999999999;
     double maxOutput = -9999999999;
-    for(double x : xVec) {
-        double output = target(x);
-        minOutput = min(output, minOutput);
-        maxOutput = max(output, maxOutput);
+    int nValues = 100;
+    for(int i = 0; i < nValues; i++) {
+        double rij = minInput + randu() * (maxInput - minInput);
+        //        double rik = distRangeLow + randu() * (distRangeHigh - distRangeLow);
+        double rik = rij;
+        double angle = 2*M_PI * randu();
+        double output = potential(rij, rik, angle);
+        minOutput = min(minOutput, output);
+        maxOutput = max(maxOutput, output);
     }
-    network.setInputRange(minInput - 3, maxInput + 3);
+    vec minInputRanges;
+    minInputRanges << 0.0 << 0.0 << 0.0;
+    vec maxInputRanges;
+    maxInputRanges << maxInput + 1.0 << maxInput + 1.0 << 2*M_PI;
+    network.setInputRanges(pair<vec,vec>(minInputRanges, maxInputRanges));
     network.setOutputRange(minOutput - 3, maxOutput + 3);
-    for(double x : xVec) {
-        network.addTargetInputOutput(x, target(x));
+    for(int i = 0; i < nValues; i++) {
+        double rij = minInput + randu() * (maxInput - minInput);
+        //        double rik = distRangeLow + randu() * (distRangeHigh - distRangeLow);
+        double rik = rij;
+        double angle = 2*M_PI * randu();
+        vec input;
+        input << rij << rik << angle;
+        vec output;
+        output << potential(rij, rik, angle);
+        network.addTargetInputOutput(input, output);
     }
     for(int i = 0; i < 8000000; i++) {
         network.advance();
         if(!(i % 10000)) {
             cout << setprecision(5) << "Iteration " << i << ", error " << network.error()
-                 << " target " << target(2.0) << " output " << network.calculateRescaled(2.0)(0)
                  << " temperature " << network.temperature()
                  << " factor " << network.addFactor() << endl;
-            ofstream outFile("test.data");
-            for(double x : xVec) {
-                outFile << x << " " << target(x) << " " << network.calculateRescaled(x)(0) << endl;
+            ofstream outFile("plot.data");
+            ofstream outFileTarget("plot_target.data");
+            for(int i = 0; i < nValues; i++) {
+                for(int j = 0; j < nValues; j++) {
+                    double rij = minInput + double(i) / nValues * (maxInput - minInput);
+                    double rik = rij;
+                    double angle = 2*M_PI * double(j) / nValues;
+                    vec input;
+                    input << rij << rik << angle;
+                    double output = network.calculateRescaled(input)(0);
+                    double targetOutput = potential(rij, rik, angle);
+                    outFile << output << " ";
+                    outFileTarget << targetOutput << " ";
+                }
+                outFile << endl;
+                outFileTarget << endl;
             }
+            outFile.close();
+            outFileTarget.close();
         }
     }
-//    outFile.close();
-//    cout << network.calculate(12.0)(0) << endl;
-//    cout << network.calculate(25.0)(0) << endl;
-//    cout << "First output: " << network.outputValues()(0) << endl;
-//    network.setInputValues(24 * ones(1));
-//    network.setTargetOutputValues(456 * ones(1));
-//    network.resetTemperature();
-//    for(int i = 0; i < 10000; i++) {
-//        network.advance();
-////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
-//    }
-//    cout << "Second output: " << network.outputValues()(0) << endl;
-//    network.setInputValues(12 * ones(1));
-//    network.setTargetOutputValues(205 * ones(1));
-//    network.resetTemperature();
-//    for(int i = 0; i < 10000; i++) {
-//        network.advance();
-////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
-//    }
-//    cout << "Third output: " << network.outputValues()(0) << endl;
-//    network.setInputValues(24 * ones(1));
-//    network.setTargetOutputValues(456 * ones(1));
-//    network.resetTemperature();
-//    for(int i = 0; i < 10000; i++) {
-//        network.advance();
-////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
-//    }
-//    cout << "Fourth output: " << network.outputValues()(0) << endl;
-//    network.setInputValues(12 * ones(1));
-//    network.setTargetOutputValues(205 * ones(1));
-//    network.resetTemperature();
-//    for(int i = 0; i < 10000; i++) {
-//        network.advance();
-////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
-//    }
-//    cout << "Fifth output: " << network.outputValues()(0) << endl;
-//    network.setInputValues(24 * ones(1));
-//    network.setTargetOutputValues(456 * ones(1));
-//    network.resetTemperature();
-//    for(int i = 0; i < 10000; i++) {
-//        network.advance();
-////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
-//    }
-//    cout << "Sixth output: " << network.outputValues()(0) << endl;
-//    network.setInputValues(12 * ones(1));
-//    network.setTargetOutputValues(205 * ones(1));
-//    network.resetTemperature();
-//    for(int i = 0; i < 10000; i++) {
-//        network.advance();
-////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
-//    }
-//    cout << "Seventh output: " << network.outputValues()(0) << endl;
-//    network.setInputValues(24 * ones(1));
-//    network.setTargetOutputValues(456 * ones(1));
-//    network.resetTemperature();
-//    for(int i = 0; i < 10000; i++) {
-//        network.advance();
-////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
-//    }
-//    cout << "Eight output: " << network.outputValues()(0) << endl;
-//    network.setInputValues(12 * ones(1));
-//    network.setTargetOutputValues(205 * ones(1));
-//    network.resetTemperature();
-//    for(int i = 0; i < 10000; i++) {
-//        network.advance();
-////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
-//    }
-//    cout << "Ninth output: " << network.outputValues()(0) << endl;
-//    network.setInputValues(24 * ones(1));
-//    network.setTargetOutputValues(456 * ones(1));
-//    network.calculate();
-//    cout << "Final output: " << network.outputValues()(0) << endl;
+    //    cout << network.calculate(12.0)(0) << endl;
+    //    cout << network.calculate(25.0)(0) << endl;
+    //    cout << "First output: " << network.outputValues()(0) << endl;
+    //    network.setInputValues(24 * ones(1));
+    //    network.setTargetOutputValues(456 * ones(1));
+    //    network.resetTemperature();
+    //    for(int i = 0; i < 10000; i++) {
+    //        network.advance();
+    ////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    //    }
+    //    cout << "Second output: " << network.outputValues()(0) << endl;
+    //    network.setInputValues(12 * ones(1));
+    //    network.setTargetOutputValues(205 * ones(1));
+    //    network.resetTemperature();
+    //    for(int i = 0; i < 10000; i++) {
+    //        network.advance();
+    ////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    //    }
+    //    cout << "Third output: " << network.outputValues()(0) << endl;
+    //    network.setInputValues(24 * ones(1));
+    //    network.setTargetOutputValues(456 * ones(1));
+    //    network.resetTemperature();
+    //    for(int i = 0; i < 10000; i++) {
+    //        network.advance();
+    ////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    //    }
+    //    cout << "Fourth output: " << network.outputValues()(0) << endl;
+    //    network.setInputValues(12 * ones(1));
+    //    network.setTargetOutputValues(205 * ones(1));
+    //    network.resetTemperature();
+    //    for(int i = 0; i < 10000; i++) {
+    //        network.advance();
+    ////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    //    }
+    //    cout << "Fifth output: " << network.outputValues()(0) << endl;
+    //    network.setInputValues(24 * ones(1));
+    //    network.setTargetOutputValues(456 * ones(1));
+    //    network.resetTemperature();
+    //    for(int i = 0; i < 10000; i++) {
+    //        network.advance();
+    ////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    //    }
+    //    cout << "Sixth output: " << network.outputValues()(0) << endl;
+    //    network.setInputValues(12 * ones(1));
+    //    network.setTargetOutputValues(205 * ones(1));
+    //    network.resetTemperature();
+    //    for(int i = 0; i < 10000; i++) {
+    //        network.advance();
+    ////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    //    }
+    //    cout << "Seventh output: " << network.outputValues()(0) << endl;
+    //    network.setInputValues(24 * ones(1));
+    //    network.setTargetOutputValues(456 * ones(1));
+    //    network.resetTemperature();
+    //    for(int i = 0; i < 10000; i++) {
+    //        network.advance();
+    ////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    //    }
+    //    cout << "Eight output: " << network.outputValues()(0) << endl;
+    //    network.setInputValues(12 * ones(1));
+    //    network.setTargetOutputValues(205 * ones(1));
+    //    network.resetTemperature();
+    //    for(int i = 0; i < 10000; i++) {
+    //        network.advance();
+    ////        cout << "i: " << i << " Output: " << network.outputValues()(0) << endl;
+    //    }
+    //    cout << "Ninth output: " << network.outputValues()(0) << endl;
+    //    network.setInputValues(24 * ones(1));
+    //    network.setTargetOutputValues(456 * ones(1));
+    //    network.calculate();
+    //    cout << "Final output: " << network.outputValues()(0) << endl;
     return 0;
 }

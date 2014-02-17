@@ -26,6 +26,11 @@ public:
     void reset();
     int id();
     void setID(int id);
+    void setAddition(double addition);
+    bool isChanged() const;
+    void setChanged(bool isChanged);
+    void restorePrevious();
+
 private:
     bool m_isInput;
     bool m_isOutput;
@@ -36,6 +41,9 @@ private:
     std::vector<Connection *> m_outputConnections;
     std::vector<double> m_outputLifeTime;
     int m_id;
+    double m_addition;
+    double m_previousAddition;
+    bool m_changed;
 };
 
 #endif // NEURON_H

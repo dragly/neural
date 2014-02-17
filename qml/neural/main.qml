@@ -70,7 +70,7 @@ ApplicationWindow {
                 var sourceNeuronAdapter = neuronAdapters[i]
                 var sourceNeuron = sourceNeuronAdapter.neuronQML
                 for(var j in sourceNeuronAdapter.outputNeuronAdapters) {
-                    var targetNeuronAdapter = neuronAdapters[j]
+                    var targetNeuronAdapter = sourceNeuronAdapter.outputNeuronAdapters[j]
                     var targetNeuron = targetNeuronAdapter.neuronQML
                     var component = Qt.createComponent("Connection.qml");
                     var properties = {

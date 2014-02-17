@@ -3,14 +3,16 @@
 #include <connection.h>
 
 #include <iostream>
+#include <cmath>
 
 using namespace std;
 
 Neuron::Neuron() :
+    m_isInput(false),
+    m_isOutput(false),
     m_inputValue(0),
     m_outputValue(0),
-    m_isInput(false),
-    m_isOutput(false)
+    m_addition(0)
 {
 }
 
@@ -33,6 +35,27 @@ void Neuron::setID(int id)
     m_id = id;
 }
 
+void Neuron::setAddition(double addition)
+{
+    m_previousAddition = m_addition;
+    m_addition = addition;
+}
+bool Neuron::isChanged() const
+{
+    return m_changed;
+}
+
+void Neuron::setChanged(bool changed)
+{
+    m_changed = changed;
+}
+
+void Neuron::restorePrevious()
+{
+    m_addition = m_previousAddition;
+}
+
+
 void Neuron::setInputValue(double value) {
     if(!m_isInput) {
         cerr << "Setting input value on a neuron that is not an input neuron" << endl;
@@ -49,14 +72,17 @@ void Neuron::addInputValue(double value)
 
 void Neuron::advance()
 {
-    if(!m_isInput) {
+    if(m_isInput) {
+        m_outputValue = m_inputValue;
+    } else {
         if(m_nInputValues > 0) {
-            m_inputValue = m_inputValueSum / m_nInputValues;
+            m_inputValue = m_inputValueSum;
         } else {
             m_inputValue = 0;
         }
+        m_outputValue = 1 / (1 + exp(-(m_inputValue + m_addition))) * 2 - 1;
     }
-    m_outputValue = m_inputValue; // / m_outputConnections.size();
+//    m_outputValue = m_inputValue;
     m_inputValueSum = 0;
     m_nInputValues = 0;
 }

@@ -32,3 +32,5 @@ QMAKE_CXXFLAGS += -std=c++0x
 
 OTHER_FILES += \
     qml/neural/BezierCurve.qml
+
+LIBS += -larmadillo -llapack -lblas

@@ -8,7 +8,7 @@ Rectangle {
 
     width: 50
     height: 25
-    color: "lightgreen"
+    color: neuronAdapter.isInput ? "lightgreen" : (neuronAdapter.isOutput ? "red" : "yellow")
 
     MouseArea {
         anchors.fill: parent

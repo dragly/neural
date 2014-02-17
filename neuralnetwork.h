@@ -4,6 +4,9 @@
 #include <vector>
 #include <armadillo>
 
+using namespace arma;
+using namespace std;
+
 class Connection;
 class Neuron;
 class NeuralNetwork
@@ -12,33 +15,65 @@ public:
     NeuralNetwork();
 
     void stepForward();
-    void setInputValues(arma::vec inputValues);
+    void addTargetInputOutput(double input, double output);
+    void addTargetInputOutput(vec input, vec output);
+//    void setInputValues(vec inputValues);
     void setup(uint nNeurons, uint nInputNeurons, uint nOutputNeurons, uint nConnections);
-    arma::vec outputValues();
+    vec outputValues();
 
-    const std::vector<Neuron*>& neurons();
+    const vector<Neuron*>& neurons();
     void transform();
     void advance();
     void restore();
     void reset();
-    arma::vec targetOutputValues() const;
-    void setTargetOutputValues(const arma::vec &targetOutputValues);
+    vec targetOutputValues() const;
+//    void setTargetOutputValues(const vec &targetOutputValues);
     void resetTemperature();
 
-    void calculate();
+    vec calculate(double inputValue);
+    vec calculate(vec inputValues);
+
+    void setInputRange(double start, double stop);
+    void setOutputRange(double start, double stop);
+
+    pair<vec, vec> inputRanges() const;
+    void setInputRanges(const pair<vec, vec> &inputRanges);
+
+    pair<vec, vec> outputRanges() const;
+    void setOutputRanges(const pair<vec, vec> &outputRanges);
+
+    vec calculateRescaled(double inputValue);
+    vec calculateRescaled(vec inputValues);
+    vec deNormalizeOutput(vec values);
+    vec normalizeOutput(vec values);
+    vec deNormalizeInput(vec values);
+    vec normalizeInput(vec values);
+    vec deNormalizeOutput(double value);
+    vec deNormalizeInput(double value);
+    vec normalizeOutput(double value);
+    vec normalizeInput(double value);
+
+    double currentDiff() {
+        return m_currentDiff;
+    }
+
 private:
-    std::vector<Neuron*> m_neurons;
-    std::vector<Neuron*> m_inputNeurons;
-    std::vector<Neuron*> m_outputNeurons;
-    std::vector<Connection*> m_connections;
-    arma::vec m_targetOutputValues;
+    vector<Neuron*> m_neurons;
+    vector<Neuron*> m_inputNeurons;
+    vector<Neuron*> m_outputNeurons;
+    vector<Connection*> m_connections;
+    vector<pair<vec, vec>> m_targetInputOutput;
+    pair<vec, vec> m_inputRanges;
+    pair<vec, vec> m_outputRanges;
+    vec m_targetOutputValues;
     double m_previousDiff;
     double m_currentDiff;
     double m_temperature;
     int m_nAdvances;
+    uint m_nStepsPerCalculation;
 };
 
-inline const std::vector<Neuron *> &NeuralNetwork::neurons()
+inline const vector<Neuron *> &NeuralNetwork::neurons()
 {
     return m_neurons;
 }

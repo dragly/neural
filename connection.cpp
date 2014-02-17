@@ -11,23 +11,9 @@ Connection::Connection(Neuron *source, Neuron *target) :
 {
 }
 
-int Connection::lifeTime() const
-{
-    return m_lifeTime;
-}
-
-void Connection::incrementLifeTime() {
-    m_lifeTime += 1;
-}
-
 void Connection::setChanged(bool changed)
 {
     m_changed = changed;
-}
-
-void Connection::setLifeTime(int lifeTime)
-{
-    m_lifeTime = lifeTime;
 }
 double Connection::weight() const
 {

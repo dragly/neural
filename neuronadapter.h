@@ -10,6 +10,8 @@ class NeuronAdapter : public QQuickItem
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(QQmlListProperty<NeuronAdapter> outputNeuronAdapters READ outputNeuronAdapters)
     Q_PROPERTY(QQuickItem* neuronQML READ neuronQML WRITE setNeuronQML)
+    Q_PROPERTY(bool isInput READ isInput NOTIFY isInputChanged)
+    Q_PROPERTY(bool isOutput READ isOutput NOTIFY isOutputChanged)
 public:
     explicit NeuronAdapter(QQuickItem *parent = 0);
 
@@ -33,9 +35,23 @@ public:
         return m_neuronQML;
     }
 
+    bool isInput() const
+    {
+        return m_isInput;
+    }
+
+    bool isOutput() const
+    {
+        return m_isOutput;
+    }
+
 signals:
 
     void nameChanged(QString arg);
+
+    void isInputChanged(bool arg);
+
+    void isOutputChanged(bool arg);
 
 public slots:
 
@@ -57,6 +73,8 @@ private:
     QString m_name;
     QList<NeuronAdapter*> m_outputNeuronAdapters;
     QQuickItem* m_neuronQML;
+    bool m_isInput;
+    bool m_isOutput;
 };
 
 #endif // NEURONQML_H

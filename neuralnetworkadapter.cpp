@@ -10,7 +10,7 @@
 NeuralNetworkAdapter::NeuralNetworkAdapter(QQuickItem *parent) :
     QQuickItem(parent)
 {
-    m_neuralNetwork.setup(7, 2, 1, 5);
+    m_neuralNetwork.setup(20, 2, 1, 3);
 
     for(Neuron* neuron : m_neuralNetwork.neurons()) {
         NeuronAdapter* neuronAdapter = new NeuronAdapter(this);
@@ -20,11 +20,12 @@ NeuralNetworkAdapter::NeuralNetworkAdapter(QQuickItem *parent) :
 
     for(NeuronAdapter* neuronAdapter : m_neuronAdapters) {
         Neuron* neuron = neuronAdapter->neuron();
-        for(uint i = 0; i < neuron->outputConnections().size(); i++) {
-            Connection* outputConnection = neuron->outputConnections().at(i);
+        for(Connection* outputConnection : neuron->outputConnections()) {
             Neuron* outputNeuron = outputConnection->targetNeuron();
+            cout << "Output to " << outputNeuron->id() << endl;
             for(NeuronAdapter* testAdapter : m_neuronAdapters) {
                 if(testAdapter->neuron() == outputNeuron) {
+                    cout << "Output to " << outputNeuron->id() << endl;
                     neuronAdapter->addOutputNeuronAdapter(testAdapter);
                 }
             }

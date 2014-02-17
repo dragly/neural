@@ -14,6 +14,10 @@ Neuron *NeuronAdapter::neuron() const
 void NeuronAdapter::setNeuron(Neuron *neuron)
 {
     m_neuron = neuron;
+    m_isInput = neuron->isInput();
+    emit isInputChanged(m_isInput);
+    m_isOutput = neuron->isOutput();
+    emit isOutputChanged(m_isOutput);
 }
 
 void NeuronAdapter::addOutputNeuronAdapter(NeuronAdapter *neuronAdapter)

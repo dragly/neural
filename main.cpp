@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     double maxInput = 2.7;
     double minOutput = 9999999999;
     double maxOutput = -9999999999;
-    int nPracticeValues = 300;
+    int nPracticeValues = 200;
     int nTestValues = 100;
     for(int i = 0; i < nPracticeValues; i++) {
         double rij = minInput + randu() * (maxInput - minInput);

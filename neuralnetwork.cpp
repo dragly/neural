@@ -23,12 +23,12 @@ void NeuralNetwork::setup(uint nNeurons, uint nInputNeurons, uint nOutputNeurons
     m_inputNeurons.clear();
     m_outputNeurons.clear();
 
-    int nHiddenLayers = 3;
-    int nPerLayer = (nNeurons - nInputNeurons - nOutputNeurons) / nHiddenLayers;
+//    int nHiddenLayers = 3;
+//    int nPerLayer = (nNeurons - nInputNeurons - nOutputNeurons) / nHiddenLayers;
 
-    vector<Neuron*> firstLayer;
-    vector<Neuron*> secondLayer;
-    vector<Neuron*> thirdLayer;
+//    vector<Neuron*> firstLayer;
+//    vector<Neuron*> secondLayer;
+//    vector<Neuron*> thirdLayer;
 
     for(uint i = 0; i < nNeurons; i++) {
         Neuron* neuron = new Neuron();
@@ -46,90 +46,90 @@ void NeuralNetwork::setup(uint nNeurons, uint nInputNeurons, uint nOutputNeurons
         neuron->setOutput(true);
         m_outputNeurons.push_back(neuron);
     }
-    for(uint i = nInputNeurons; i < nInputNeurons + nPerLayer; i++) {
-        Neuron* neuron = m_neurons.at(i);
-        firstLayer.push_back(neuron);
-    }
-    for(uint i = nInputNeurons + nPerLayer; i < nInputNeurons + 2 * nPerLayer; i++) {
-        Neuron* neuron = m_neurons.at(i);
-        secondLayer.push_back(neuron);
-    }
-    for(uint i = nInputNeurons + 2*nPerLayer; i < nInputNeurons + 3 * nPerLayer; i++) {
-        Neuron* neuron = m_neurons.at(i);
-        thirdLayer.push_back(neuron);
-    }
+//    for(uint i = nInputNeurons; i < nInputNeurons + nPerLayer; i++) {
+//        Neuron* neuron = m_neurons.at(i);
+//        firstLayer.push_back(neuron);
+//    }
+//    for(uint i = nInputNeurons + nPerLayer; i < nInputNeurons + 2 * nPerLayer; i++) {
+//        Neuron* neuron = m_neurons.at(i);
+//        secondLayer.push_back(neuron);
+//    }
+//    for(uint i = nInputNeurons + 2*nPerLayer; i < nInputNeurons + 3 * nPerLayer; i++) {
+//        Neuron* neuron = m_neurons.at(i);
+//        thirdLayer.push_back(neuron);
+//    }
 
-    for(Neuron* neuron : m_inputNeurons) {
-        for(Neuron* otherNeuron : firstLayer) {
-            Connection* connection = new Connection(neuron, otherNeuron);
-            neuron->addOutputConnection(connection);
-            m_connections.push_back(connection);
-        }
-    }
-
-    for(Neuron* neuron : firstLayer) {
-        for(Neuron* otherNeuron : secondLayer) {
-            Connection* connection = new Connection(neuron, otherNeuron);
-            neuron->addOutputConnection(connection);
-            m_connections.push_back(connection);
-        }
-    }
-
-    for(Neuron* neuron : secondLayer) {
-        for(Neuron* otherNeuron : thirdLayer) {
-            Connection* connection = new Connection(neuron, otherNeuron);
-            neuron->addOutputConnection(connection);
-            m_connections.push_back(connection);
-        }
-    }
-
-    for(Neuron* neuron : thirdLayer) {
-        for(Neuron* otherNeuron : m_outputNeurons) {
-            Connection* connection = new Connection(neuron, otherNeuron);
-            neuron->addOutputConnection(connection);
-            m_connections.push_back(connection);
-        }
-    }
-
-    // Set up connections
-//    int firstIndex = 0;
-//    for(Neuron* neuron : m_neurons) {
-//        if(neuron->isOutput()) {
-//            continue;
-//        }
-//        for(uint i = 0; i < nConnections; i++) {
-//            uint randomIndex = randu() * nNeurons;
-//            Neuron* otherNeuron = m_neurons.at(randomIndex);
-//            cout << firstIndex << " to " << randomIndex << "/" << nNeurons << " is output: " << otherNeuron->isOutput() << endl;
-//            if(otherNeuron->isInput()) {
-//                i--;
-//                continue;
-//            }
-//            if(otherNeuron == neuron) {
-//                i--;
-//                continue;
-//            }
-//            bool existsAlready = false;
-
-//            for(Connection* existingConnection : m_connections) {
-//                if(existingConnection->sourceNeuron() == neuron &&
-//                        existingConnection->targetNeuron() == otherNeuron) {
-//                    existsAlready = true;
-//                }
-//            }
-//            if(existsAlready) {
-//                i--;
-//                continue;
-//            }
+//    for(Neuron* neuron : m_inputNeurons) {
+//        for(Neuron* otherNeuron : firstLayer) {
 //            Connection* connection = new Connection(neuron, otherNeuron);
-//            //            connection->setWeight(randu() * 1000);
-//            connection->setWeight(randn() * 1);
 //            neuron->addOutputConnection(connection);
 //            m_connections.push_back(connection);
-//            cout << "Done!" << endl;
 //        }
-//        firstIndex++;
 //    }
+
+//    for(Neuron* neuron : firstLayer) {
+//        for(Neuron* otherNeuron : secondLayer) {
+//            Connection* connection = new Connection(neuron, otherNeuron);
+//            neuron->addOutputConnection(connection);
+//            m_connections.push_back(connection);
+//        }
+//    }
+
+//    for(Neuron* neuron : secondLayer) {
+//        for(Neuron* otherNeuron : thirdLayer) {
+//            Connection* connection = new Connection(neuron, otherNeuron);
+//            neuron->addOutputConnection(connection);
+//            m_connections.push_back(connection);
+//        }
+//    }
+
+//    for(Neuron* neuron : thirdLayer) {
+//        for(Neuron* otherNeuron : m_outputNeurons) {
+//            Connection* connection = new Connection(neuron, otherNeuron);
+//            neuron->addOutputConnection(connection);
+//            m_connections.push_back(connection);
+//        }
+//    }
+
+    // Set up connections
+    int firstIndex = 0;
+    for(Neuron* neuron : m_neurons) {
+        if(neuron->isOutput()) {
+            continue;
+        }
+        for(uint i = 0; i < nConnections; i++) {
+            uint randomIndex = randu() * nNeurons;
+            Neuron* otherNeuron = m_neurons.at(randomIndex);
+            cout << firstIndex << " to " << randomIndex << "/" << nNeurons << " is output: " << otherNeuron->isOutput() << endl;
+            if(otherNeuron->isInput()) {
+                i--;
+                continue;
+            }
+            if(otherNeuron == neuron) {
+                i--;
+                continue;
+            }
+            bool existsAlready = false;
+
+            for(Connection* existingConnection : m_connections) {
+                if(existingConnection->sourceNeuron() == neuron &&
+                        existingConnection->targetNeuron() == otherNeuron) {
+                    existsAlready = true;
+                }
+            }
+            if(existsAlready) {
+                i--;
+                continue;
+            }
+            Connection* connection = new Connection(neuron, otherNeuron);
+            //            connection->setWeight(randu() * 1000);
+            connection->setWeight(randn() * 1);
+            neuron->addOutputConnection(connection);
+            m_connections.push_back(connection);
+            cout << "Done!" << endl;
+        }
+        firstIndex++;
+    }
 
     pair<vec, vec> defaultInputRanges;
     defaultInputRanges.first = zeros(nInputNeurons);
@@ -244,7 +244,7 @@ void NeuralNetwork::advance() {
 //        cout << "Restore" << endl;
         restore();
     }
-    m_temperature = 0.0000001 + double(1000) / pow(m_nAdvances,1.1);
+    m_temperature = 0.0000001 + double(10000) / pow(m_nAdvances,1.25);
     m_nAdvances++;
 }
 
@@ -342,7 +342,7 @@ void NeuralNetwork::transform() {
     // Select random connection
     uint connectionID = randu() * m_connections.size();
     Connection* connection = m_connections.at(connectionID);
-    double weightFactor = 0.1 + 1000 / (m_nAdvances * 0.01);
+    double weightFactor = 0.1 + 100 / sqrt((m_nAdvances * 0.1));
     connection->setWeight(randn() * weightFactor);
     connection->setChanged(true);
 
@@ -354,7 +354,7 @@ void NeuralNetwork::transform() {
     // Select random neuron
     uint neuronID = randu() * m_neurons.size();
     Neuron* neuron = m_neurons.at(neuronID);
-    m_addFactor = 0.1 + 1000 / (m_nAdvances * 0.01);
+    m_addFactor = 0.1 + 100 / sqrt((m_nAdvances * 0.1));
     neuron->setAddition(randn() * m_addFactor);
     neuron->setChanged(true);
 }

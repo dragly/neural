@@ -125,6 +125,17 @@ int main(int argc, char* argv[])
             outFile.close();
             outFileTarget.close();
         }
+//        if(!(i % 100000)) {
+//            double rij = minInput + randu() * (maxInput - minInput);
+//            //        double rik = distRangeLow + randu() * (distRangeHigh - distRangeLow);
+//            double rik = rij;
+//            double angle = 2*M_PI * randu();
+//            vec input;
+//            input << rij << rik << angle;
+//            vec output;
+//            output << potential(rij, rik, angle);
+//            network.addTargetInputOutput(input, output);
+//        }
     }
     //    cout << network.calculate(12.0)(0) << endl;
     //    cout << network.calculate(25.0)(0) << endl;

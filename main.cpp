@@ -66,12 +66,12 @@ int main(int argc, char* argv[])
     //    return app.exec();
     cout << "Starting network" << endl;
     NeuralNetwork network;
-    network.setup(28, 3, 1, 5);
-    double minInput = 1.5;
+    network.setup(20, 3, 1, 5);
+    double minInput = 1.2;
     double maxInput = 2.7;
     double minOutput = 9999999999;
     double maxOutput = -9999999999;
-    int nPracticeValues = 30;
+    int nPracticeValues = 300;
     int nTestValues = 100;
     for(int i = 0; i < nPracticeValues; i++) {
         double rij = minInput + randu() * (maxInput - minInput);
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
     maxInputRanges << maxInput + 1.0 << maxInput + 1.0 << 2*M_PI;
     network.setInputRanges(pair<vec,vec>(minInputRanges, maxInputRanges));
     network.setOutputRange(minOutput - 3, maxOutput + 3);
-    for(int i = 0; i < nTestValues; i++) {
+    for(int i = 0; i < nPracticeValues; i++) {
         double rij = minInput + randu() * (maxInput - minInput);
         //        double rik = distRangeLow + randu() * (distRangeHigh - distRangeLow);
         double rik = rij;

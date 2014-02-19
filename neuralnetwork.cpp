@@ -280,12 +280,16 @@ void NeuralNetwork::advance() {
     m_currentError = m_currentDiff;
     m_weightMaxCurrent = 0;
     for(Connection *connection : m_connections) {
-//        m_currentDiff += 1e-9 * connection->weight() * connection->weight();
+//        if(connection->weight() > 0.01) {
+//            m_currentDiff += connection->weight() * connection->weight();
+//        }
         m_weightMaxCurrent = max(m_weightMaxCurrent, connection->weight());
     }
     m_additionMaxCurrent = 0;
     for(Neuron *neuron : m_neurons) {
-//        m_currentDiff += 1e-9 * neuron->addition() * neuron->addition();
+//        if(neuron->addition() > 0.01) {
+//            m_currentDiff += neuron->addition() * neuron->addition();
+//        }
         m_additionMaxCurrent = max(m_additionMaxCurrent, neuron->addition());
     }
     double deltaDiff = m_currentDiff - m_previousDiff;
@@ -310,7 +314,7 @@ void NeuralNetwork::advance() {
     }
     m_totalCount += 1;
     m_temperature = 1e-10 + min(10.0, 1e-2*m_previousError);
-//        m_temperature = 0.01;
+    //        m_temperature = 0.01;
     m_nAdvances++;
     m_stepsSinceWeightRefresh++;
 }
@@ -406,26 +410,28 @@ void NeuralNetwork::transform() {
     for(Connection* connection : m_connections) {
         connection->setChanged(false);
     }
-    // Select random connection
-    uint connectionID = randu() * m_connections.size();
-    Connection* connection = m_connections.at(connectionID);
-//    double weightFactor = pow(10.0, 4*randn());
-        double weightFactor = 0.001 + min(4.0, 1e9 / pow(m_nAdvances, 2.0));
-    //    double weightFactor = m_previousError*10;
-    connection->setWeight(randn() * weightFactor);
-    connection->setChanged(true);
-
-
     // Reset the changed-status of all neurons
     for(Neuron* neuron : m_neurons) {
         neuron->setChanged(false);
     }
-    // Select random neuron
-    uint neuronID = randu() * m_neurons.size();
-    Neuron* neuron = m_neurons.at(neuronID);
-//    m_addFactor = pow(10.0, 4*randn());;
-        m_addFactor = 0.001 + min(4.0, 1e9 / pow(m_nAdvances, 2.0));
-    //    m_addFactor = m_previousError*10;
-    neuron->setAddition(randn() * m_addFactor);
-    neuron->setChanged(true);
+    // Throw dice to see if we should change a connection or a neuron
+    if(randu() > 0.5) {
+        // Select random connection
+        uint connectionID = randu() * m_connections.size();
+        Connection* connection = m_connections.at(connectionID);
+//        double weightFactor = 1e-4;
+                double weightFactor = 0.001 + min(4.0, 1e9 / pow(m_nAdvances, 2.0));
+        //    double weightFactor = m_previousError*10;
+        connection->setWeight(randn() * weightFactor);
+        connection->setChanged(true);
+    } else {
+        // Select random neuron
+        uint neuronID = randu() * m_neurons.size();
+        Neuron* neuron = m_neurons.at(neuronID);
+//        m_addFactor = 1e-4;
+                m_addFactor = 0.001 + min(4.0, 1e9 / pow(m_nAdvances, 2.0));
+        //    m_addFactor = m_previousError*10;
+        neuron->setAddition(randn() * m_addFactor);
+        neuron->setChanged(true);
+    }
 }

@@ -8,7 +8,8 @@ using namespace arma;
 NeuralNetwork::NeuralNetwork() :
     m_previousDiff(INFINITY),
     m_currentDiff(1),
-    m_nAdvances(1)
+    m_nAdvances(1),
+    m_stepsSinceWeightRefresh(1)
 {
         srand(time(NULL));
     //    srand(-1);
@@ -217,7 +218,8 @@ void NeuralNetwork::addTargetInputOutput(vec input, vec output)
 void NeuralNetwork::resetTemperature()
 {
     m_temperature = 100000;
-    m_nAdvances = 1;
+//    m_nAdvances = 1;
+    m_stepsSinceWeightRefresh = 1;
 }
 
 
@@ -244,8 +246,9 @@ void NeuralNetwork::advance() {
 //        cout << "Restore" << endl;
         restore();
     }
-    m_temperature = 0.0000001 + double(10000) / pow(m_nAdvances,1.25);
+    m_temperature = 0.1 + double(10000) / pow(m_nAdvances,1.25);
     m_nAdvances++;
+    m_stepsSinceWeightRefresh++;
 }
 
 vec NeuralNetwork::calculate(double inputValue) {
@@ -342,7 +345,7 @@ void NeuralNetwork::transform() {
     // Select random connection
     uint connectionID = randu() * m_connections.size();
     Connection* connection = m_connections.at(connectionID);
-    double weightFactor = 0.1 + 100 / sqrt((m_nAdvances * 0.1));
+    double weightFactor = 0.1 + 100 / sqrt((m_stepsSinceWeightRefresh * 0.1));
     connection->setWeight(randn() * weightFactor);
     connection->setChanged(true);
 
@@ -354,7 +357,7 @@ void NeuralNetwork::transform() {
     // Select random neuron
     uint neuronID = randu() * m_neurons.size();
     Neuron* neuron = m_neurons.at(neuronID);
-    m_addFactor = 0.1 + 100 / sqrt((m_nAdvances * 0.1));
+    m_addFactor = 0.1 + 100 / sqrt((m_stepsSinceWeightRefresh * 0.1));
     neuron->setAddition(randn() * m_addFactor);
     neuron->setChanged(true);
 }

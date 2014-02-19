@@ -34,3 +34,8 @@ OTHER_FILES += \
     qml/neural/BezierCurve.qml
 
 LIBS += -larmadillo -llapack -lblas
+
+release {
+    QMAKE_CXXFLAGS += -O3
+    QMAKE_CXXFLAGS += -g
+}

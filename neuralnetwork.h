@@ -76,6 +76,7 @@ private:
     double m_currentDiff;
     double m_temperature;
     int m_nAdvances;
+    int m_stepsSinceWeightRefresh;
     uint m_nStepsPerCalculation;
     double m_addFactor;
 };

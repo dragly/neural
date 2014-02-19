@@ -61,6 +61,8 @@ public:
     int trueAcceptCount();
     int rejectCount();
     int totalCount();
+    double weightMax();
+    double additionMax();
 
 private:
     vector<Neuron*> m_neurons;
@@ -84,6 +86,10 @@ private:
     int m_trueAcceptCount;
     int m_rejectCount;
     int m_totalCount;
+    double m_weightMaxPrevious;
+    double m_additionMaxPrevious;
+    double m_weightMaxCurrent;
+    double m_additionMaxCurrent;
 };
 
 inline const vector<Neuron *> &NeuralNetwork::neurons()

@@ -115,6 +115,7 @@ int main(int argc, char* argv[])
                  << " accept ratio " << network.acceptCount() / double(network.totalCount())
                  << " true accept ratio " << network.trueAcceptCount() / double(network.totalCount())
                  << " ratio ratio " << network.trueAcceptCount() / double(network.acceptCount())
+                 << " weight addition max " << network.weightMax() << "  " << network.additionMax()
                  << " factor " << network.addFactor() << endl;
             ofstream outFile("plot.data");
             ofstream outFileTarget("plot_target.data");

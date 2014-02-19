@@ -131,7 +131,6 @@ void NeuralNetwork::setup(uint nNeurons, uint nInputNeurons, uint nOutputNeurons
                 }
                 Connection* connection = new Connection(neuron, otherNeuron);
                 //            connection->setWeight(randu() * 1000);
-                connection->setWeight(randn() * 1);
                 neuron->addOutputConnection(connection);
                 m_connections.push_back(connection);
                 cout << "Done!" << endl;
@@ -183,6 +182,16 @@ int NeuralNetwork::rejectCount() {
 
 int NeuralNetwork::totalCount() {
     return m_totalCount;
+}
+
+double NeuralNetwork::weightMax()
+{
+    return m_weightMaxPrevious;
+}
+
+double NeuralNetwork::additionMax()
+{
+    return m_additionMaxPrevious;
 }
 
 vec NeuralNetwork::normalizeOutput(double value) {
@@ -269,11 +278,15 @@ void NeuralNetwork::advance() {
         m_currentDiff += thisDiff*thisDiff;
     }
     m_currentError = m_currentDiff;
+    m_weightMaxCurrent = 0;
     for(Connection *connection : m_connections) {
-        //        m_currentDiff += 1.0 * connection->weight() * connection->weight();
+//        m_currentDiff += 1e-9 * connection->weight() * connection->weight();
+        m_weightMaxCurrent = max(m_weightMaxCurrent, connection->weight());
     }
+    m_additionMaxCurrent = 0;
     for(Neuron *neuron : m_neurons) {
-        //        m_currentDiff += 1.0 * neuron->addition() * neuron->addition();
+//        m_currentDiff += 1e-9 * neuron->addition() * neuron->addition();
+        m_additionMaxCurrent = max(m_additionMaxCurrent, neuron->addition());
     }
     double deltaDiff = m_currentDiff - m_previousDiff;
     //    double deltaDiff = randn();
@@ -285,6 +298,8 @@ void NeuralNetwork::advance() {
         m_acceptCount += 1;
         m_previousDiff = m_currentDiff;
         m_previousError = m_currentError;
+        m_additionMaxPrevious = m_additionMaxCurrent;
+        m_weightMaxPrevious = m_weightMaxCurrent;
         if(acceptanceProbability >= 1) {
             m_trueAcceptCount += 1;
         }
@@ -295,7 +310,7 @@ void NeuralNetwork::advance() {
     }
     m_totalCount += 1;
     m_temperature = 1e-10 + min(10.0, 1e-2*m_previousError);
-    //    m_temperature = 0.01;
+//        m_temperature = 0.01;
     m_nAdvances++;
     m_stepsSinceWeightRefresh++;
 }
@@ -394,7 +409,7 @@ void NeuralNetwork::transform() {
     // Select random connection
     uint connectionID = randu() * m_connections.size();
     Connection* connection = m_connections.at(connectionID);
-//    double weightFactor = 4.0;
+//    double weightFactor = pow(10.0, 4*randn());
         double weightFactor = 0.001 + min(4.0, 1e9 / pow(m_nAdvances, 2.0));
     //    double weightFactor = m_previousError*10;
     connection->setWeight(randn() * weightFactor);
@@ -408,7 +423,7 @@ void NeuralNetwork::transform() {
     // Select random neuron
     uint neuronID = randu() * m_neurons.size();
     Neuron* neuron = m_neurons.at(neuronID);
-//    m_addFactor = 4.0;
+//    m_addFactor = pow(10.0, 4*randn());;
         m_addFactor = 0.001 + min(4.0, 1e9 / pow(m_nAdvances, 2.0));
     //    m_addFactor = m_previousError*10;
     neuron->setAddition(randn() * m_addFactor);

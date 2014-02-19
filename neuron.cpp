@@ -40,6 +40,10 @@ void Neuron::setAddition(double addition)
     m_previousAddition = m_addition;
     m_addition = addition;
 }
+
+double Neuron::addition() {
+    return m_addition;
+}
 bool Neuron::isChanged() const
 {
     return m_changed;

@@ -54,33 +54,37 @@ double target(double x) {
 
 int main(int argc, char* argv[])
 {
-//        qmlRegisterType<NeuralNetworkAdapter>("NeuralNetwork", 1, 0, "NeuralNetworkAdapter");
-//        qmlRegisterType<NeuronAdapter>("NeuralNetwork", 1, 0, "NeuronAdapter");
+    //        qmlRegisterType<NeuralNetworkAdapter>("NeuralNetwork", 1, 0, "NeuralNetworkAdapter");
+    //        qmlRegisterType<NeuronAdapter>("NeuralNetwork", 1, 0, "NeuronAdapter");
 
-//        Application app(argc, argv);
+    //        Application app(argc, argv);
 
-//        QtQuick2ControlsApplicationViewer viewer;
-//        viewer.setMainQmlFile(QStringLiteral("qml/neural/main.qml"));
-//        viewer.show();
+    //        QtQuick2ControlsApplicationViewer viewer;
+    //        viewer.setMainQmlFile(QStringLiteral("qml/neural/main.qml"));
+    //        viewer.show();
 
-//        return app.exec();
-//    cout << "Starting network" << endl;
+    //        return app.exec();
+    //    cout << "Starting network" << endl;
     NeuralNetwork network;
-    network.setup(30, 3, 1, 6);
+    network.setup(30, 3, 1, 10);
     double minInput = 1.2;
     double maxInput = 2.7;
     double minOutput = 9999999999;
     double maxOutput = -9999999999;
-    int nPracticeValues = 200;
+    int nPracticeValues = 10;
     int nTestValues = 100;
     for(int i = 0; i < nPracticeValues; i++) {
-        double rij = minInput + randu() * (maxInput - minInput);
-        double rik = minInput + randu() * (maxInput - minInput);
-        //        double rik = rij;
-        double angle = M_PI * randu();
-        double output = potential(rij, rik, angle);
-        minOutput = min(minOutput, output);
-        maxOutput = max(maxOutput, output);
+        for(int j = 0; j < nPracticeValues; j++) {
+            //            double rij = minInput + randu() * (maxInput - minInput);
+            double rij = minInput + double(i) / nPracticeValues * (maxInput - minInput);
+            //        double rik = minInput + randu() * (maxInput - minInput);
+            double rik = rij;
+            //            double angle = M_PI * randu();
+            double angle = M_PI * double(j) / nPracticeValues;
+            double output = potential(rij, rik, angle);
+            minOutput = min(minOutput, output);
+            maxOutput = max(maxOutput, output);
+        }
     }
     vec minInputRanges;
     minInputRanges << 0.0 << 0.0 << 0.0;
@@ -89,29 +93,34 @@ int main(int argc, char* argv[])
     network.setInputRanges(pair<vec,vec>(minInputRanges, maxInputRanges));
     network.setOutputRange(minOutput - 3, maxOutput + 3);
     for(int i = 0; i < nPracticeValues; i++) {
-        double rij = minInput + randu() * (maxInput - minInput);
-        double rik = minInput + randu() * (maxInput - minInput);
-        //        double rik = rij;
-        double angle = M_PI * randu();
-        vec input;
-        input << rij << rik << angle;
-        vec output;
-        output << potential(rij, rik, angle);
-        network.addTargetInputOutput(input, output);
+        for(int j = 0; j < nPracticeValues; j++) {
+            //            double rij = minInput + randu() * (maxInput - minInput);
+            double rij = minInput + double(i) / nPracticeValues * (maxInput - minInput);
+            //        double rik = minInput + randu() * (maxInput - minInput);
+            double rik = rij;
+            //            double angle = M_PI * randu();
+            double angle = M_PI * double(j) / nPracticeValues;
+            vec input;
+            input << rij << rik << angle;
+            vec output;
+            output << potential(rij, rik, angle);
+            network.addTargetInputOutput(input, output);
+        }
     }
     for(int i = 0; i < 80000000; i++) {
         network.advance();
         if(!(i % 1000)) {
             cout << setprecision(5) << "Iteration " << i << ", error " << network.error()
                  << " temperature " << network.temperature()
+                 << " accept ratio " << network.acceptCount() / double(network.totalCount())
                  << " factor " << network.addFactor() << endl;
             ofstream outFile("plot.data");
             ofstream outFileTarget("plot_target.data");
             for(int i = 0; i < nTestValues; i++) {
                 for(int j = 0; j < nTestValues; j++) {
                     double rij = minInput + double(i) / nTestValues * (maxInput - minInput);
-//                    double rik = rij;
-                    double rik = minInput;
+                    double rik = rij;
+                    //                    double rik = minInput;
                     double angle = M_PI * double(j) / nTestValues;
                     vec input;
                     input << rij << rik << angle;
@@ -125,19 +134,20 @@ int main(int argc, char* argv[])
             }
             outFile.close();
             outFileTarget.close();
+            network.resetCounters();
         }
-//        if(!(i % 30000)) {
-//            double rij = minInput + randu() * (maxInput - minInput);
-//            //        double rik = distRangeLow + randu() * (distRangeHigh - distRangeLow);
-//            double rik = minInput + randu() * (maxInput - minInput);
-//            double angle = M_PI * randu();
-//            vec input;
-//            input << rij << rik << angle;
-//            vec output;
-//            output << potential(rij, rik, angle);
-//            network.addTargetInputOutput(input, output);
-//            network.resetTemperature();
-//        }
+        //        if(!(i % 30000)) {
+        //            double rij = minInput + randu() * (maxInput - minInput);
+        //            //        double rik = distRangeLow + randu() * (distRangeHigh - distRangeLow);
+        //            double rik = minInput + randu() * (maxInput - minInput);
+        //            double angle = M_PI * randu();
+        //            vec input;
+        //            input << rij << rik << angle;
+        //            vec output;
+        //            output << potential(rij, rik, angle);
+        //            network.addTargetInputOutput(input, output);
+        //            network.resetTemperature();
+        //        }
     }
     //    cout << network.calculate(12.0)(0) << endl;
     //    cout << network.calculate(25.0)(0) << endl;
@@ -210,5 +220,5 @@ int main(int argc, char* argv[])
     //    network.setTargetOutputValues(456 * ones(1));
     //    network.calculate();
     //    cout << "Final output: " << network.outputValues()(0) << endl;
-//    return 0;
+    //    return 0;
 }

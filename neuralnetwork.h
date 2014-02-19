@@ -52,16 +52,14 @@ public:
     vec deNormalizeInput(double value);
     vec normalizeOutput(double value);
     vec normalizeInput(double value);
-    double temperature() {
-        return m_temperature;
-    }
-
-
-    double error() {
-        return m_previousDiff;
-    }
-
+    double temperature();
+    double error();
     double addFactor() const;
+    void resetCounters();
+
+    int acceptCount();
+    int rejectCount();
+    int totalCount();
 
 private:
     vector<Neuron*> m_neurons;
@@ -75,15 +73,28 @@ private:
     double m_previousDiff;
     double m_currentDiff;
     double m_temperature;
+    double m_previousError;
+    double m_currentError;
     int m_nAdvances;
     int m_stepsSinceWeightRefresh;
     uint m_nStepsPerCalculation;
     double m_addFactor;
+    int m_acceptCount;
+    int m_rejectCount;
+    int m_totalCount;
 };
 
 inline const vector<Neuron *> &NeuralNetwork::neurons()
 {
     return m_neurons;
+}
+
+inline double NeuralNetwork::temperature() {
+    return m_temperature;
+}
+
+inline double NeuralNetwork::error() {
+    return m_previousError;
 }
 
 #endif // NEURALNETWORK_H

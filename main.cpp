@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
     //    return app.exec();
     cout << "Starting network" << endl;
     NeuralNetwork network;
-    network.setup(20, 3, 1, 5);
+    network.setup(20, 3, 1, 10);
     double minInput = 1.2;
     double maxInput = 2.7;
     double minOutput = 9999999999;
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
     }
     for(int i = 0; i < 80000000; i++) {
         network.advance();
-        if(!(i % 10000)) {
+        if(!(i % 1000)) {
             cout << setprecision(5) << "Iteration " << i << ", error " << network.error()
                  << " temperature " << network.temperature()
                  << " factor " << network.addFactor() << endl;

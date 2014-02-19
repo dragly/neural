@@ -233,6 +233,13 @@ void NeuralNetwork::advance() {
 //        m_currentDiff = thisDiff;
         m_currentDiff += thisDiff*thisDiff;
     }
+    m_currentError = m_currentDiff;
+    for(Connection *connection : m_connections) {
+        m_currentDiff += 0.001 * connection->weight() * connection->weight();
+    }
+    for(Neuron *neuron : m_neurons) {
+        m_currentDiff += 0.001 * neuron->addition() * neuron->addition();
+    }
     double deltaDiff = m_currentDiff - m_previousDiff;
 //    double deltaDiff = randn();
 //    cout << deltaDiff << endl;
@@ -240,11 +247,12 @@ void NeuralNetwork::advance() {
     if(randu() < exp(-deltaDiff / (m_temperature / m_nAdvances))) {
 //        cout << "Keep" << endl;
         m_previousDiff = m_currentDiff;
+        m_previousError = m_currentError;
     } else {
 //        cout << "Restore" << endl;
         restore();
     }
-    m_temperature = 0.0000001 + double(10000) / pow(m_nAdvances,1.25);
+    m_temperature = 0.0000001 + double(1000000) / pow(m_nAdvances,1.25);
     m_nAdvances++;
 }
 
@@ -342,7 +350,8 @@ void NeuralNetwork::transform() {
     // Select random connection
     uint connectionID = randu() * m_connections.size();
     Connection* connection = m_connections.at(connectionID);
-    double weightFactor = 0.1 + 100 / sqrt((m_nAdvances * 0.1));
+//    double weightFactor = 0.1 + 100 / sqrt((m_nAdvances * 0.1));
+    double weightFactor = 50 * fabs(sin(m_nAdvances * 0.001));
     connection->setWeight(randn() * weightFactor);
     connection->setChanged(true);
 
@@ -354,7 +363,8 @@ void NeuralNetwork::transform() {
     // Select random neuron
     uint neuronID = randu() * m_neurons.size();
     Neuron* neuron = m_neurons.at(neuronID);
-    m_addFactor = 0.1 + 100 / sqrt((m_nAdvances * 0.1));
+//    m_addFactor = 0.1 + 100 / sqrt((m_nAdvances * 0.1));
+    m_addFactor = 50 * fabs(sin(m_nAdvances * 0.001));
     neuron->setAddition(randn() * m_addFactor);
     neuron->setChanged(true);
 }

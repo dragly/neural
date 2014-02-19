@@ -52,15 +52,8 @@ public:
     vec deNormalizeInput(double value);
     vec normalizeOutput(double value);
     vec normalizeInput(double value);
-    double temperature() {
-        return m_temperature;
-    }
-
-
-    double error() {
-        return m_previousDiff;
-    }
-
+    double temperature();
+    double error();
     double addFactor() const;
 
 private:
@@ -75,6 +68,8 @@ private:
     double m_previousDiff;
     double m_currentDiff;
     double m_temperature;
+    double m_previousError;
+    double m_currentError;
     int m_nAdvances;
     uint m_nStepsPerCalculation;
     double m_addFactor;
@@ -83,6 +78,14 @@ private:
 inline const vector<Neuron *> &NeuralNetwork::neurons()
 {
     return m_neurons;
+}
+
+inline double NeuralNetwork::temperature() {
+    return m_temperature;
+}
+
+inline double NeuralNetwork::error() {
+    return m_previousError;
 }
 
 #endif // NEURALNETWORK_H

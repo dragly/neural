@@ -27,6 +27,8 @@ public:
     int id();
     void setID(int id);
     void setAddition(double addition);
+    double addition();
+
     bool isChanged() const;
     void setChanged(bool isChanged);
     void restorePrevious();

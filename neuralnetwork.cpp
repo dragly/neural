@@ -44,7 +44,7 @@ void NeuralNetwork::setup(uint nNeurons, uint nInputNeurons, uint nOutputNeurons
         m_outputNeurons.push_back(neuron);
     }
 
-    bool layered = false;
+    bool layered = true;
     if(layered) {
         // Layered connections
 

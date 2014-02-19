@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
     //        return app.exec();
     //    cout << "Starting network" << endl;
     NeuralNetwork network;
-    network.setup(30, 3, 1, 10);
+    network.setup(30, 3, 1, 7);
     double minInput = 1.2;
     double maxInput = 2.7;
     double minOutput = 9999999999;
@@ -114,6 +114,7 @@ int main(int argc, char* argv[])
                  << " temperature " << network.temperature()
                  << " accept ratio " << network.acceptCount() / double(network.totalCount())
                  << " true accept ratio " << network.trueAcceptCount() / double(network.totalCount())
+                 << " ratio ratio " << network.trueAcceptCount() / double(network.acceptCount())
                  << " factor " << network.addFactor() << endl;
             ofstream outFile("plot.data");
             ofstream outFileTarget("plot_target.data");

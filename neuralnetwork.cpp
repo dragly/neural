@@ -14,7 +14,7 @@ NeuralNetwork::NeuralNetwork() :
     m_rejectCount(0),
     m_totalCount(0)
 {
-        srand(time(NULL));
+    srand(time(NULL));
     //    srand(-1);
 }
 
@@ -44,98 +44,101 @@ void NeuralNetwork::setup(uint nNeurons, uint nInputNeurons, uint nOutputNeurons
         m_outputNeurons.push_back(neuron);
     }
 
-    // Layered connections
+    bool layered = false;
+    if(layered) {
+        // Layered connections
 
-    int nHiddenLayers = 3;
-    int nPerLayer = (nNeurons - nInputNeurons - nOutputNeurons) / nHiddenLayers;
+        int nHiddenLayers = 3;
+        int nPerLayer = (nNeurons - nInputNeurons - nOutputNeurons) / nHiddenLayers;
 
-    vector<Neuron*> firstLayer;
-    vector<Neuron*> secondLayer;
-    vector<Neuron*> thirdLayer;
-    for(uint i = nInputNeurons; i < nInputNeurons + nPerLayer; i++) {
-        Neuron* neuron = m_neurons.at(i);
-        firstLayer.push_back(neuron);
-    }
-    for(uint i = nInputNeurons + nPerLayer; i < nInputNeurons + 2 * nPerLayer; i++) {
-        Neuron* neuron = m_neurons.at(i);
-        secondLayer.push_back(neuron);
-    }
-    for(uint i = nInputNeurons + 2*nPerLayer; i < nInputNeurons + 3 * nPerLayer; i++) {
-        Neuron* neuron = m_neurons.at(i);
-        thirdLayer.push_back(neuron);
-    }
+        vector<Neuron*> firstLayer;
+        vector<Neuron*> secondLayer;
+        vector<Neuron*> thirdLayer;
+        for(uint i = nInputNeurons; i < nInputNeurons + nPerLayer; i++) {
+            Neuron* neuron = m_neurons.at(i);
+            firstLayer.push_back(neuron);
+        }
+        for(uint i = nInputNeurons + nPerLayer; i < nInputNeurons + 2 * nPerLayer; i++) {
+            Neuron* neuron = m_neurons.at(i);
+            secondLayer.push_back(neuron);
+        }
+        for(uint i = nInputNeurons + 2*nPerLayer; i < nInputNeurons + 3 * nPerLayer; i++) {
+            Neuron* neuron = m_neurons.at(i);
+            thirdLayer.push_back(neuron);
+        }
 
-    for(Neuron* neuron : m_inputNeurons) {
-        for(Neuron* otherNeuron : firstLayer) {
-            Connection* connection = new Connection(neuron, otherNeuron);
-            neuron->addOutputConnection(connection);
-            m_connections.push_back(connection);
+        for(Neuron* neuron : m_inputNeurons) {
+            for(Neuron* otherNeuron : firstLayer) {
+                Connection* connection = new Connection(neuron, otherNeuron);
+                neuron->addOutputConnection(connection);
+                m_connections.push_back(connection);
+            }
+        }
+
+        for(Neuron* neuron : firstLayer) {
+            for(Neuron* otherNeuron : secondLayer) {
+                Connection* connection = new Connection(neuron, otherNeuron);
+                neuron->addOutputConnection(connection);
+                m_connections.push_back(connection);
+            }
+        }
+
+        for(Neuron* neuron : secondLayer) {
+            for(Neuron* otherNeuron : thirdLayer) {
+                Connection* connection = new Connection(neuron, otherNeuron);
+                neuron->addOutputConnection(connection);
+                m_connections.push_back(connection);
+            }
+        }
+
+        for(Neuron* neuron : thirdLayer) {
+            for(Neuron* otherNeuron : m_outputNeurons) {
+                Connection* connection = new Connection(neuron, otherNeuron);
+                neuron->addOutputConnection(connection);
+                m_connections.push_back(connection);
+            }
+        }
+    } else {
+        // Set up connections
+        int firstIndex = 0;
+        for(Neuron* neuron : m_neurons) {
+            if(neuron->isOutput()) {
+                continue;
+            }
+            for(uint i = 0; i < nConnections; i++) {
+                uint randomIndex = randu() * nNeurons;
+                Neuron* otherNeuron = m_neurons.at(randomIndex);
+                cout << firstIndex << " to " << randomIndex << "/" << nNeurons << " is output: " << otherNeuron->isOutput() << endl;
+                if(otherNeuron->isInput()) {
+                    i--;
+                    continue;
+                }
+                if(otherNeuron == neuron) {
+                    i--;
+                    continue;
+                }
+                bool existsAlready = false;
+
+                for(Connection* existingConnection : m_connections) {
+                    if(existingConnection->sourceNeuron() == neuron &&
+                            existingConnection->targetNeuron() == otherNeuron) {
+                        existsAlready = true;
+                    }
+                }
+                if(existsAlready) {
+                    i--;
+                    continue;
+                }
+                Connection* connection = new Connection(neuron, otherNeuron);
+                //            connection->setWeight(randu() * 1000);
+                connection->setWeight(randn() * 1);
+                neuron->addOutputConnection(connection);
+                m_connections.push_back(connection);
+                cout << "Done!" << endl;
+            }
+            firstIndex++;
         }
     }
-
-    for(Neuron* neuron : firstLayer) {
-        for(Neuron* otherNeuron : secondLayer) {
-            Connection* connection = new Connection(neuron, otherNeuron);
-            neuron->addOutputConnection(connection);
-            m_connections.push_back(connection);
-        }
-    }
-
-    for(Neuron* neuron : secondLayer) {
-        for(Neuron* otherNeuron : thirdLayer) {
-            Connection* connection = new Connection(neuron, otherNeuron);
-            neuron->addOutputConnection(connection);
-            m_connections.push_back(connection);
-        }
-    }
-
-    for(Neuron* neuron : thirdLayer) {
-        for(Neuron* otherNeuron : m_outputNeurons) {
-            Connection* connection = new Connection(neuron, otherNeuron);
-            neuron->addOutputConnection(connection);
-            m_connections.push_back(connection);
-        }
-    }
-
-//    // Set up connections
-//    int firstIndex = 0;
-//    for(Neuron* neuron : m_neurons) {
-//        if(neuron->isOutput()) {
-//            continue;
-//        }
-//        for(uint i = 0; i < nConnections; i++) {
-//            uint randomIndex = randu() * nNeurons;
-//            Neuron* otherNeuron = m_neurons.at(randomIndex);
-//            cout << firstIndex << " to " << randomIndex << "/" << nNeurons << " is output: " << otherNeuron->isOutput() << endl;
-//            if(otherNeuron->isInput()) {
-//                i--;
-//                continue;
-//            }
-//            if(otherNeuron == neuron) {
-//                i--;
-//                continue;
-//            }
-//            bool existsAlready = false;
-
-//            for(Connection* existingConnection : m_connections) {
-//                if(existingConnection->sourceNeuron() == neuron &&
-//                        existingConnection->targetNeuron() == otherNeuron) {
-//                    existsAlready = true;
-//                }
-//            }
-//            if(existsAlready) {
-//                i--;
-//                continue;
-//            }
-//            Connection* connection = new Connection(neuron, otherNeuron);
-//            //            connection->setWeight(randu() * 1000);
-//            connection->setWeight(randn() * 1);
-//            neuron->addOutputConnection(connection);
-//            m_connections.push_back(connection);
-//            cout << "Done!" << endl;
-//        }
-//        firstIndex++;
-//    }
 
     pair<vec, vec> defaultInputRanges;
     defaultInputRanges.first = zeros(nInputNeurons);
@@ -238,17 +241,17 @@ void NeuralNetwork::addTargetInputOutput(vec input, vec output)
         cerr << "NeuralNetwork::addTargetInputOutput: Number of output values does not match the number of output neurons in network." << endl;
         return;
     }
-//    cout << "Target input/output received as " << input << output << endl;
+    //    cout << "Target input/output received as " << input << output << endl;
     vec normalizedInput = normalizeInput(input);
     vec normalizedOutput = normalizeOutput(output);
-//    cout << "Target input/output set to " << normalizedInput << " " << normalizedOutput << endl;
+    //    cout << "Target input/output set to " << normalizedInput << " " << normalizedOutput << endl;
     m_targetInputOutput.push_back(std::pair<vec, vec>(normalizedInput, normalizedOutput));
 }
 
 void NeuralNetwork::resetTemperature()
 {
     m_temperature = 100000;
-//    m_nAdvances = 1;
+    //    m_nAdvances = 1;
     m_stepsSinceWeightRefresh = 1;
 }
 
@@ -262,37 +265,37 @@ void NeuralNetwork::advance() {
         vec outputValues = calculate(targetInput);
         vec diff = targetOutput - outputValues;
         double thisDiff = dot(diff, diff);
-//        m_currentDiff = thisDiff;
+        //        m_currentDiff = thisDiff;
         m_currentDiff += thisDiff*thisDiff;
     }
     m_currentError = m_currentDiff;
     for(Connection *connection : m_connections) {
-//        m_currentDiff += 1.0 * connection->weight() * connection->weight();
+        //        m_currentDiff += 1.0 * connection->weight() * connection->weight();
     }
     for(Neuron *neuron : m_neurons) {
-//        m_currentDiff += 1.0 * neuron->addition() * neuron->addition();
+        //        m_currentDiff += 1.0 * neuron->addition() * neuron->addition();
     }
     double deltaDiff = m_currentDiff - m_previousDiff;
-//    double deltaDiff = randn();
-//    cout << deltaDiff << endl;
-//    if(m_currentDiff < m_previousDiff) {
-    double acceptanceProbability = exp(-deltaDiff / (m_temperature / m_nAdvances));
+    //    double deltaDiff = randn();
+    //    cout << deltaDiff << endl;
+    //    if(m_currentDiff < m_previousDiff) {
+    double acceptanceProbability = exp(-deltaDiff / (m_temperature));
     if(randu() < acceptanceProbability) {
-//        cout << "Keep" << endl;
+        //        cout << "Keep" << endl;
         m_acceptCount += 1;
         m_previousDiff = m_currentDiff;
         m_previousError = m_currentError;
-        if(acceptanceProbability > 1) {
+        if(acceptanceProbability >= 1) {
             m_trueAcceptCount += 1;
         }
     } else {
-//        cout << "Restore" << endl;
+        //        cout << "Restore" << endl;
         m_rejectCount += 1;
         restore();
     }
     m_totalCount += 1;
-    m_temperature = 0.00001 + min(10.0, double(100000) / pow(m_nAdvances,2.0));
-//    m_temperature = 0.01;
+    m_temperature = 1e-10 + min(10.0, 1e-2*m_previousError);
+    //    m_temperature = 0.01;
     m_nAdvances++;
     m_stepsSinceWeightRefresh++;
 }
@@ -391,9 +394,9 @@ void NeuralNetwork::transform() {
     // Select random connection
     uint connectionID = randu() * m_connections.size();
     Connection* connection = m_connections.at(connectionID);
-    double weightFactor = 4.0;
-//    double weightFactor = 0.1 + 100 / sqrt((m_nAdvances * 0.1));
-//    double weightFactor = m_previousError*10;
+//    double weightFactor = 4.0;
+        double weightFactor = 0.001 + min(4.0, 1e9 / pow(m_nAdvances, 2.0));
+    //    double weightFactor = m_previousError*10;
     connection->setWeight(randn() * weightFactor);
     connection->setChanged(true);
 
@@ -405,9 +408,9 @@ void NeuralNetwork::transform() {
     // Select random neuron
     uint neuronID = randu() * m_neurons.size();
     Neuron* neuron = m_neurons.at(neuronID);
-    m_addFactor = 4.0;
-//    m_addFactor = 0.1 + 100 / sqrt((m_nAdvances * 0.1));
-//    m_addFactor = m_previousError*10;
+//    m_addFactor = 4.0;
+        m_addFactor = 0.001 + min(4.0, 1e9 / pow(m_nAdvances, 2.0));
+    //    m_addFactor = m_previousError*10;
     neuron->setAddition(randn() * m_addFactor);
     neuron->setChanged(true);
 }

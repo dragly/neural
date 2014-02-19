@@ -58,6 +58,7 @@ public:
     void resetCounters();
 
     int acceptCount();
+    int trueAcceptCount();
     int rejectCount();
     int totalCount();
 
@@ -80,6 +81,7 @@ private:
     uint m_nStepsPerCalculation;
     double m_addFactor;
     int m_acceptCount;
+    int m_trueAcceptCount;
     int m_rejectCount;
     int m_totalCount;
 };

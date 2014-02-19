@@ -113,6 +113,7 @@ int main(int argc, char* argv[])
             cout << setprecision(5) << "Iteration " << i << ", error " << network.error()
                  << " temperature " << network.temperature()
                  << " accept ratio " << network.acceptCount() / double(network.totalCount())
+                 << " true accept ratio " << network.trueAcceptCount() / double(network.totalCount())
                  << " factor " << network.addFactor() << endl;
             ofstream outFile("plot.data");
             ofstream outFileTarget("plot_target.data");

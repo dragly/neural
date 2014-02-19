@@ -162,10 +162,16 @@ void NeuralNetwork::resetCounters()
     m_acceptCount = 0;
     m_rejectCount = 0;
     m_totalCount = 0;
+    m_trueAcceptCount = 0;
 }
 
 int NeuralNetwork::acceptCount() {
     return m_acceptCount;
+}
+
+int NeuralNetwork::trueAcceptCount()
+{
+    return m_trueAcceptCount;
 }
 
 int NeuralNetwork::rejectCount() {
@@ -270,11 +276,15 @@ void NeuralNetwork::advance() {
 //    double deltaDiff = randn();
 //    cout << deltaDiff << endl;
 //    if(m_currentDiff < m_previousDiff) {
-    if(randu() < exp(-deltaDiff / (m_temperature / m_nAdvances))) {
+    double acceptanceProbability = exp(-deltaDiff / (m_temperature / m_nAdvances));
+    if(randu() < acceptanceProbability) {
 //        cout << "Keep" << endl;
         m_acceptCount += 1;
         m_previousDiff = m_currentDiff;
         m_previousError = m_currentError;
+        if(acceptanceProbability > 1) {
+            m_trueAcceptCount += 1;
+        }
     } else {
 //        cout << "Restore" << endl;
         m_rejectCount += 1;

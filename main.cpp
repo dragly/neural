@@ -35,7 +35,7 @@ double potential(double rij, double rik, double angle) {
     double sqrtp = (cos(angle) - cos(theta0));
     double p = sqrtp * sqrtp;
     double V3 = Bijk * f * p;
-    return V2 + V3;
+    return V2 + V3 + sin(angle*4);
 }
 
 double target(double x) {
@@ -67,18 +67,18 @@ int main(int argc, char* argv[])
     //    cout << "Starting network" << endl;
     NeuralNetwork network;
     network.setup(20, 3, 1, 7);
-    double minInput = 1.2;
+    double minInput = 1.1;
     double maxInput = 2.7;
     double minOutput = 9999999999;
     double maxOutput = -9999999999;
-    int nPracticeValues = 20;
-    int nTestValues = nPracticeValues;
+    int nPracticeValues = 10;
+    int nTestValues = 100;
     for(int i = 0; i < nPracticeValues; i++) {
         for(int j = 0; j < nPracticeValues; j++) {
             //            double rij = minInput + randu() * (maxInput - minInput);
             double rij = minInput + double(i) / nPracticeValues * (maxInput - minInput);
             //        double rik = minInput + randu() * (maxInput - minInput);
-            double rik = rij;
+            double rik = minInput + randu() * (maxInput - minInput);
             //            double angle = M_PI * randu();
             double angle = M_PI * double(j) / nPracticeValues;
             double output = potential(rij, rik, angle);

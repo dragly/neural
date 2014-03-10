@@ -419,8 +419,8 @@ void NeuralNetwork::transform() {
         // Select random connection
         uint connectionID = randu() * m_connections.size();
         Connection* connection = m_connections.at(connectionID);
-//        double weightFactor = 1e-4;
-                double weightFactor = 0.001 + min(4.0, 1e9 / pow(m_nAdvances, 2.0));
+        double weightFactor = pow(10, randu()*1.0);
+//                double weightFactor = 0.001 + min(4.0, 1e9 / pow(m_nAdvances, 2.0));
         //    double weightFactor = m_previousError*10;
         connection->setWeight(randn() * weightFactor);
         connection->setChanged(true);
@@ -428,8 +428,8 @@ void NeuralNetwork::transform() {
         // Select random neuron
         uint neuronID = randu() * m_neurons.size();
         Neuron* neuron = m_neurons.at(neuronID);
-//        m_addFactor = 1e-4;
-                m_addFactor = 0.001 + min(4.0, 1e9 / pow(m_nAdvances, 2.0));
+        m_addFactor = pow(10, randu()*1.0);
+//                m_addFactor = 0.001 + min(4.0, 1e9 / pow(m_nAdvances, 2.0));
         //    m_addFactor = m_previousError*10;
         neuron->setAddition(randn() * m_addFactor);
         neuron->setChanged(true);

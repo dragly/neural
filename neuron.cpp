@@ -85,6 +85,7 @@ void Neuron::advance()
             m_inputValue = 0;
         }
         m_outputValue = 1 / (1 + exp(-(m_inputValue + m_addition))) * 2 - 1;
+//        m_outputValue = sin(m_inputValue + m_addition);
     }
 //    m_outputValue = m_inputValue;
     m_inputValueSum = 0;
